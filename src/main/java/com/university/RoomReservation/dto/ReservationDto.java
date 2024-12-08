@@ -31,7 +31,7 @@ public class ReservationDto {
     private Integer semester;
     private String classType;
     private String examType;
-    private String meetingTitle;
+    private String meetingName;
     private String meetingDescription;
     private String eventName;
     private String eventDescription;

@@ -2,6 +2,7 @@ package com.university.RoomReservation.mapper;
 
 import com.university.RoomReservation.dto.ReservationDto;
 import com.university.RoomReservation.model.*;
+import com.university.RoomReservation.model.enums.ReservationPurpose;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -13,7 +14,7 @@ public class ReservationMapper {
         dto.setRoomId(reservation.getRoom().getId());
         dto.setStartTime(reservation.getStartTime());
         dto.setEndTime(reservation.getEndTime());
-        dto.setReservationPurpose(reservation.getReservationPurpose());
+        dto.setReservationPurpose(ReservationPurpose.fromValue(reservation.getReservationPurpose()).getValue());
 
         if (reservation instanceof ClassReservation classReservation) {
             dto.setSubject(classReservation.getSubject());
@@ -24,7 +25,7 @@ public class ReservationMapper {
             dto.setSemester(examReservation.getSemester());
             dto.setExamType(examReservation.getExamType().getValue());
         } else if (reservation instanceof MeetingReservation meetingReservation) {
-            dto.setMeetingTitle(meetingReservation.getMeetingName());
+            dto.setMeetingName(meetingReservation.getMeetingName());
             dto.setMeetingDescription(meetingReservation.getMeetingDescription());
         } else if (reservation instanceof EventReservation eventReservation) {
             dto.setEventName(eventReservation.getEventName());

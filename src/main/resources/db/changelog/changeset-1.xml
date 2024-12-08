@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="01-create-tables" author="danilo.cerovic">
+        <sql>
+            CREATE TABLE user (
+                                  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                  username VARCHAR(255) NOT NULL UNIQUE,
+                                  password VARCHAR(255) NOT NULL,
+                                  role ENUM('USER', 'ADMIN') NOT NULL
+            );
+
+            CREATE TABLE employee (
+                                      id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                      first_name VARCHAR(50) NOT NULL,
+                                      last_name VARCHAR(50) NOT NULL,
+                                      email VARCHAR(50) NOT NULL,
+                                      title VARCHAR(255) NOT NULL,
+                                      department VARCHAR(255) NOT NULL,
+                                      user_id BIGINT NOT NULL,
+                                      CONSTRAINT fk_employee_user FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+            );
+
+            CREATE TABLE room (
+                                  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                  name VARCHAR(50) NOT NULL,
+                                  room_type ENUM('CLASSROOM', 'COMPUTER_ROOM', 'AMPHITHEATER') NOT NULL,
+                                  capacity INT NOT NULL,
+                                  number_of_computers INT
+            );
+
+            CREATE TABLE reservation (
+                                         id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                         start_time DATETIME NOT NULL,
+                                         end_time DATETIME NOT NULL,
+                                         user_id BIGINT NOT NULL,
+                                         room_id BIGINT NOT NULL,
+                                         reservation_status ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL,
+                                         reservation_purpose ENUM('CLASS', 'EXAM', 'MEETING', 'EVENT') NOT NULL,
+                                         subject VARCHAR(255),
+                                         semester INT,
+                                         class_type ENUM('LECTURE', 'EXERCISE'),
+                                         event_name VARCHAR(255),
+                                         event_description TEXT,
+                                         meeting_name VARCHAR(255),
+                                         meeting_description TEXT,
+                                         exam_type ENUM('WRITTEN', 'ORAL', 'SEMINAR'),
+                                         FOREIGN KEY (user_id) REFERENCES user(id),
+                                         FOREIGN KEY (room_id) REFERENCES room(id)
+            );
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

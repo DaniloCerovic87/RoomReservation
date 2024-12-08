@@ -86,15 +86,15 @@ public class ReservationServiceImpl implements ReservationService {
                 reservation = examReservation;
             }
             case MEETING -> {
-                if (StringUtils.isBlank(dto.getMeetingTitle())) {
-                    throw new IllegalArgumentException("Meeting title is required for meeting reservation.");
+                if (StringUtils.isBlank(dto.getMeetingName())) {
+                    throw new IllegalArgumentException("Meeting name is required for meeting reservation.");
                 }
                 if (StringUtils.isBlank(dto.getMeetingDescription())) {
                     throw new IllegalArgumentException("Meeting description is required for meeting reservation.");
                 }
 
                 MeetingReservation meetingReservation = new MeetingReservation();
-                meetingReservation.setMeetingName(dto.getMeetingTitle());
+                meetingReservation.setMeetingName(dto.getMeetingName());
                 meetingReservation.setMeetingDescription(dto.getMeetingDescription());
                 reservation = meetingReservation;
             }

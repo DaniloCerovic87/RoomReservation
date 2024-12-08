@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@DiscriminatorValue("Event")
+@DiscriminatorValue("EVENT")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class EventReservation extends Reservation {

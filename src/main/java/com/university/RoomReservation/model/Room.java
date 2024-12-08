@@ -21,7 +21,7 @@ public class Room {
 
     @Enumerated(EnumType.STRING)
     @NotNull
-    private RoomType type;
+    private RoomType roomType;
 
     @OneToMany(mappedBy = "room")
     private List<Reservation> reservations;
