@@ -12,12 +12,4 @@ public enum RoomType {
 
     private final String value;
 
-    public static RoomType fromValue(String value) {
-        for (RoomType roomType : RoomType.values()) {
-            if (roomType.value.equalsIgnoreCase(value)) {
-                return roomType;
-            }
-        }
-        throw new IllegalArgumentException("Unknown room type: " + value);
-    }
 }
