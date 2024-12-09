@@ -55,4 +55,40 @@
         </sql>
     </changeSet>
 
+    <changeSet id="02-data-import" author="danilo.cerovic">
+        <sql>
+            INSERT INTO room (name, room_type, capacity)
+            VALUES ('Room 1', 'CLASSROOM', 60);
+
+            INSERT INTO room (name, room_type, capacity)
+            VALUES ('Room 2', 'CLASSROOM', 50);
+
+            INSERT INTO room (name, room_type, capacity)
+            VALUES ('Room 3', 'CLASSROOM', 40);
+
+            INSERT INTO room (name, room_type, capacity, number_of_computers)
+            VALUES ('Computer Room 1', 'COMPUTER_ROOM', 60, 30);
+
+            INSERT INTO room (name, room_type, capacity, number_of_computers)
+            VALUES ('Computer Room 1', 'COMPUTER_ROOM', 50, 25);
+
+            INSERT INTO room (name, room_type, capacity)
+            VALUES ('Room 3', 'AMPHITHEATER', 200);
+
+
+            INSERT INTO user (username, password, role)
+            VALUES ('Pera', 'fon123', 'USER');
+
+            INSERT INTO user (username, password, role)
+            VALUES ('Mika', 'fon345', 'ADMIN');
+
+
+            INSERT INTO employee (first_name, last_name, email, title, department, user_id)
+            VALUES ('Nikola', 'Nikolic', 'nikola.nikolic@gmail.com', 'Professor', 'IT',  1 );
+
+            INSERT INTO employee (first_name, last_name, email, title, department, user_id)
+            VALUES ('Marko', 'Markovic', 'marko.markovic@gmail.com', 'Assistant', 'IT',  2 );
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
