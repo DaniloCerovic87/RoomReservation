@@ -1,38 +1,40 @@
 package com.university.RoomReservation.mapper;
 
-import com.university.RoomReservation.dto.ReservationDto;
+import com.university.RoomReservation.request.ReservationRequest;
 import com.university.RoomReservation.model.*;
 import com.university.RoomReservation.model.enums.ReservationPurpose;
+import com.university.RoomReservation.response.ReservationResponse;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class ReservationMapper {
 
-    public static ReservationDto mapToDto(Reservation reservation) {
-        ReservationDto dto = new ReservationDto();
-        dto.setUserId(reservation.getUser().getId());
-        dto.setRoomId(reservation.getRoom().getId());
-        dto.setStartTime(reservation.getStartTime());
-        dto.setEndTime(reservation.getEndTime());
-        dto.setReservationPurpose(ReservationPurpose.fromValue(reservation.getReservationPurpose()).getValue());
+    public static ReservationResponse mapToDto(Reservation reservation) {
+        ReservationResponse response = new ReservationResponse();
+        response.setId(reservation.getId());
+        response.setUserId(reservation.getUser().getId());
+        response.setRoomId(reservation.getRoom().getId());
+        response.setStartTime(reservation.getStartTime());
+        response.setEndTime(reservation.getEndTime());
+        response.setReservationPurpose(ReservationPurpose.fromValue(reservation.getReservationPurpose()).getValue());
 
         if (reservation instanceof ClassReservation classReservation) {
-            dto.setSubject(classReservation.getSubject());
-            dto.setSemester(classReservation.getSemester());
-            dto.setClassType(classReservation.getClassType().getValue());
+            response.setSubject(classReservation.getSubject());
+            response.setSemester(classReservation.getSemester());
+            response.setClassType(classReservation.getClassType().getValue());
         } else if (reservation instanceof ExamReservation examReservation) {
-            dto.setSubject(examReservation.getSubject());
-            dto.setSemester(examReservation.getSemester());
-            dto.setExamType(examReservation.getExamType().getValue());
+            response.setSubject(examReservation.getSubject());
+            response.setSemester(examReservation.getSemester());
+            response.setExamType(examReservation.getExamType().getValue());
         } else if (reservation instanceof MeetingReservation meetingReservation) {
-            dto.setMeetingName(meetingReservation.getMeetingName());
-            dto.setMeetingDescription(meetingReservation.getMeetingDescription());
+            response.setMeetingName(meetingReservation.getMeetingName());
+            response.setMeetingDescription(meetingReservation.getMeetingDescription());
         } else if (reservation instanceof EventReservation eventReservation) {
-            dto.setEventName(eventReservation.getEventName());
-            dto.setEventDescription(eventReservation.getEventDescription());
+            response.setEventName(eventReservation.getEventName());
+            response.setEventDescription(eventReservation.getEventDescription());
         }
 
-        return dto;
+        return response;
     }
 
 }

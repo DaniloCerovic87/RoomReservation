@@ -1,6 +1,6 @@
 package com.university.RoomReservation.service.impl;
 
-import com.university.RoomReservation.dto.ReservationDto;
+import com.university.RoomReservation.request.ReservationRequest;
 import com.university.RoomReservation.exception.ResourceNotFoundException;
 import com.university.RoomReservation.mapper.ReservationMapper;
 import com.university.RoomReservation.model.*;
@@ -11,6 +11,7 @@ import com.university.RoomReservation.model.enums.ReservationStatus;
 import com.university.RoomReservation.repository.ReservationRepository;
 import com.university.RoomReservation.repository.RoomRepository;
 import com.university.RoomReservation.repository.UserRepository;
+import com.university.RoomReservation.response.ReservationResponse;
 import com.university.RoomReservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -27,18 +28,18 @@ public class ReservationServiceImpl implements ReservationService {
     private final UserRepository userRepository;
 
     @Override
-    public ReservationDto createReservation(ReservationDto reservationDto) {
-        User user = userRepository.findById(reservationDto.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found for id: " + reservationDto.getUserId()));
-        Room room = roomRepository.findById(reservationDto.getRoomId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found for id: " + reservationDto.getUserId()));
+    public ReservationResponse createReservation(ReservationRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found for id: " + request.getUserId()));
+        Room room = roomRepository.findById(request.getRoomId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found for id: " + request.getUserId()));
 
-        Reservation reservation = createSpecificReservation(reservationDto);
+        Reservation reservation = createSpecificReservation(request);
 
         reservation.setUser(user);
         reservation.setRoom(room);
-        reservation.setStartTime(reservationDto.getStartTime());
-        reservation.setEndTime(reservationDto.getEndTime());
+        reservation.setStartTime(request.getStartTime());
+        reservation.setEndTime(request.getEndTime());
         reservation.setReservationStatus(ReservationStatus.PENDING);
 
         reservation = reservationRepository.save(reservation);
@@ -46,7 +47,7 @@ public class ReservationServiceImpl implements ReservationService {
         return ReservationMapper.mapToDto(reservation);
     }
 
-    private Reservation createSpecificReservation(ReservationDto dto) {
+    private Reservation createSpecificReservation(ReservationRequest dto) {
         ReservationPurpose reservationPurpose = ReservationPurpose.fromValue(dto.getReservationPurpose());
         Reservation reservation = null;
         switch (reservationPurpose) {

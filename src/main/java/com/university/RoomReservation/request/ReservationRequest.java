@@ -1,4 +1,4 @@
-package com.university.RoomReservation.dto;
+package com.university.RoomReservation.request;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
@@ -8,7 +8,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class ReservationDto {
+public class ReservationRequest {
 
     @NotNull(message = "User ID is required")
     private Long userId;
