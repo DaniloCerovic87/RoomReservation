@@ -1,5 +1,7 @@
 package com.university.RoomReservation.model.enums;
 
+import com.university.RoomReservation.constants.MessageProperties;
+import com.university.RoomReservation.exception.ValidationException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +20,6 @@ public enum ExamType {
                 return type;
             }
         }
-        throw new IllegalArgumentException("Unknown exam type: " + value);
+        throw new ValidationException(MessageProperties.UNKNOWN_EXAM_TYPE, value);
     }
 }

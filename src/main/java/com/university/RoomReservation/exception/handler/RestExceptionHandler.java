@@ -1,34 +1,53 @@
 package com.university.RoomReservation.exception.handler;
 
-import com.university.RoomReservation.exception.response.ApiError;
 import com.university.RoomReservation.exception.ResourceNotFoundException;
+import com.university.RoomReservation.exception.ValidationException;
+import com.university.RoomReservation.exception.response.ApiError;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.Objects;
 
 import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
-public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+@RequiredArgsConstructor
+public class RestExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Object> handleBadRequest(IllegalArgumentException ex) {
+    private final MessageSource messageSource;
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Object> handleArgumentNotValid(MethodArgumentNotValidException ex) {
+        String errorMessage = messageSource.getMessage(ex.getMessage(), new Object[]{}, LocaleContextHolder.getLocale());
         ApiError apiError = ApiError.builder()
                 .status(BAD_REQUEST.value())
                 .message("Malformed request")
-                .debugMessage(ex.getMessage()).build();
+                .debugMessage(errorMessage).build();
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Object> handleValidationException(ValidationException ex) {
+        String errorMessage = messageSource.getMessage(ex.getMessageKey(), ex.getParams(), LocaleContextHolder.getLocale());
+        ApiError apiError = ApiError.builder()
+                .status(BAD_REQUEST.value())
+                .message("Malformed request")
+                .debugMessage(errorMessage).build();
         return buildResponseEntity(apiError);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex) {
+        String errorMessage = messageSource.getMessage(ex.getMessageKey(), new Object[]{}, LocaleContextHolder.getLocale());
         ApiError apiError = ApiError.builder()
                 .status(NOT_FOUND.value())
                 .message("Resource not found")
-                .debugMessage(ex.getMessage()).build();
+                .debugMessage(errorMessage).build();
         return buildResponseEntity(apiError);
     }
 

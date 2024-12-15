@@ -1,5 +1,6 @@
 package com.university.RoomReservation.request;
 
+import com.university.RoomReservation.constants.MessageProperties;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,21 +11,21 @@ import java.time.LocalDateTime;
 @Data
 public class ReservationRequest {
 
-    @NotNull(message = "User ID is required")
+    @NotNull(message = MessageProperties.RESERVATION_USER_ID_NOT_NULL)
     private Long userId;
 
-    @NotNull(message = "Room ID is required")
+    @NotNull(message = MessageProperties.RESERVATION_ROOM_ID_NOT_NULL)
     private Long roomId;
 
-    @NotNull(message = "Start time is required")
-    @FutureOrPresent(message = "Start time must be in the future or present")
+    @NotNull(message = MessageProperties.RESERVATION_START_TIME_NOT_NULL)
+    @FutureOrPresent(message = MessageProperties.RESERVATION_START_TIME_FUTURE_OR_PRESENT)
     private LocalDateTime startTime;
 
-    @NotNull(message = "End time is required")
-    @FutureOrPresent(message = "End time must be in the future or present")
+    @NotNull(message = MessageProperties.RESERVATION_END_TIME_NOT_NULL)
+    @FutureOrPresent(message = MessageProperties.RESERVATION_END_TIME_FUTURE_OR_PRESENT)
     private LocalDateTime endTime;
 
-    @NotBlank(message = "Purpose of reservation is required")
+    @NotBlank(message = MessageProperties.RESERVATION_PURPOSE_NOT_BLANK)
     private String reservationPurpose;
 
     private String subject;

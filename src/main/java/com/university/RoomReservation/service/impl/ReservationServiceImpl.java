@@ -1,7 +1,7 @@
 package com.university.RoomReservation.service.impl;
 
-import com.university.RoomReservation.request.ReservationRequest;
 import com.university.RoomReservation.exception.ResourceNotFoundException;
+import com.university.RoomReservation.exception.ValidationException;
 import com.university.RoomReservation.mapper.ReservationMapper;
 import com.university.RoomReservation.model.*;
 import com.university.RoomReservation.model.enums.ClassType;
@@ -11,11 +11,14 @@ import com.university.RoomReservation.model.enums.ReservationStatus;
 import com.university.RoomReservation.repository.ReservationRepository;
 import com.university.RoomReservation.repository.RoomRepository;
 import com.university.RoomReservation.repository.UserRepository;
+import com.university.RoomReservation.request.ReservationRequest;
 import com.university.RoomReservation.response.ReservationResponse;
 import com.university.RoomReservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import static com.university.RoomReservation.constants.MessageProperties.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +33,9 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationResponse createReservation(ReservationRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found for id: " + request.getUserId()));
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
         Room room = roomRepository.findById(request.getRoomId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found for id: " + request.getUserId()));
+                .orElseThrow(() -> new ResourceNotFoundException(ROOM_NOT_FOUND));
 
         Reservation reservation = createSpecificReservation(request);
 
@@ -53,14 +56,14 @@ public class ReservationServiceImpl implements ReservationService {
         switch (reservationPurpose) {
             case CLASS -> {
                 if (StringUtils.isBlank(dto.getSubject())) {
-                    throw new IllegalArgumentException("Subject is required for class reservation.");
+                    throw new ValidationException(SUBJECT_REQUIRED_FOR_CLASS);
                 }
                 if (dto.getSemester() == null) {
-                    throw new IllegalArgumentException("Semester is required for class reservation.");
+                    throw new ValidationException(SEMESTER_REQUIRED_FOR_CLASS);
                 }
 
                 if (StringUtils.isBlank(dto.getClassType())) {
-                    throw new IllegalArgumentException("Class type is required for class reservation.");
+                    throw new ValidationException(CLASS_TYPE_REQUIRED);
                 }
 
                 ClassReservation classReservation = new ClassReservation();
@@ -71,13 +74,13 @@ public class ReservationServiceImpl implements ReservationService {
             }
             case EXAM -> {
                 if (StringUtils.isBlank(dto.getSubject())) {
-                    throw new IllegalArgumentException("Subject is required for exam reservation.");
+                    throw new ValidationException(SUBJECT_REQUIRED_FOR_EXAM);
                 }
                 if (dto.getSemester() == null) {
-                    throw new IllegalArgumentException("Semester is required for exam reservation.");
+                    throw new ValidationException(SEMESTER_REQUIRED_FOR_EXAM);
                 }
                 if (StringUtils.isBlank(dto.getExamType())) {
-                    throw new IllegalArgumentException("Exam type is required for exam reservation.");
+                    throw new ValidationException(EXAM_TYPE_REQUIRED);
                 }
 
                 ExamReservation examReservation = new ExamReservation();
@@ -88,10 +91,10 @@ public class ReservationServiceImpl implements ReservationService {
             }
             case MEETING -> {
                 if (StringUtils.isBlank(dto.getMeetingName())) {
-                    throw new IllegalArgumentException("Meeting name is required for meeting reservation.");
+                    throw new ValidationException(MEETING_NAME_REQUIRED);
                 }
                 if (StringUtils.isBlank(dto.getMeetingDescription())) {
-                    throw new IllegalArgumentException("Meeting description is required for meeting reservation.");
+                    throw new ValidationException(MEETING_DESCRIPTION_REQUIRED);
                 }
 
                 MeetingReservation meetingReservation = new MeetingReservation();
@@ -101,10 +104,10 @@ public class ReservationServiceImpl implements ReservationService {
             }
             case EVENT -> {
                 if (StringUtils.isBlank(dto.getEventName())) {
-                    throw new IllegalArgumentException("Event name is required for event reservation.");
+                    throw new ValidationException(EVENT_NAME_REQUIRED);
                 }
                 if (StringUtils.isBlank(dto.getEventDescription())) {
-                    throw new IllegalArgumentException("Event description is required for event reservation.");
+                    throw new ValidationException(EVENT_DESCRIPTION_REQUIRED);
                 }
 
                 EventReservation eventReservation = new EventReservation();

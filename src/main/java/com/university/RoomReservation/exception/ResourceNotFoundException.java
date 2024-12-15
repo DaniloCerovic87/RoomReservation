@@ -1,8 +1,13 @@
 package com.university.RoomReservation.exception;
 
+import lombok.Getter;
+
+@Getter
 public class ResourceNotFoundException extends RuntimeException {
 
-    public ResourceNotFoundException(String message) {
-        super(message);
+    private final String messageKey;
+
+    public ResourceNotFoundException(String messageKey) {
+        this.messageKey = messageKey;
     }
 }

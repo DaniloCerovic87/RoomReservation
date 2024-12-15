@@ -1,6 +1,5 @@
 package com.university.RoomReservation.mapper;
 
-import com.university.RoomReservation.request.ReservationRequest;
 import com.university.RoomReservation.model.*;
 import com.university.RoomReservation.model.enums.ReservationPurpose;
 import com.university.RoomReservation.response.ReservationResponse;

@@ -1,5 +1,7 @@
 package com.university.RoomReservation.model.enums;
 
+import com.university.RoomReservation.constants.MessageProperties;
+import com.university.RoomReservation.exception.ValidationException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +21,6 @@ public enum ReservationPurpose {
                 return purpose;
             }
         }
-        throw new IllegalArgumentException("Unknown reservation purpose: " + value);
+        throw new ValidationException(MessageProperties.UNKNOWN_RESERVATION_PURPOSE, value);
     }
 }
