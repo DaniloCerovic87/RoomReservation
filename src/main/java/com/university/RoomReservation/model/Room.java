@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.util.List;
-
 @Entity
 @Data
 public class Room {
@@ -22,9 +20,6 @@ public class Room {
     @Enumerated(EnumType.STRING)
     @NotNull
     private RoomType roomType;
-
-    @OneToMany(mappedBy = "room")
-    private List<Reservation> reservations;
 
     @NotNull
     private Integer capacity;
