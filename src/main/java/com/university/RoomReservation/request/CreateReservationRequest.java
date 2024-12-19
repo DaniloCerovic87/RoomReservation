@@ -9,7 +9,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class ReservationRequest {
+public class CreateReservationRequest {
 
     @NotNull(message = MessageProperties.RESERVATION_USER_ID_NOT_NULL)
     private Long userId;

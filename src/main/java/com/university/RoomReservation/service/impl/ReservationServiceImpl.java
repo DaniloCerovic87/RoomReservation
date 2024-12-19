@@ -11,7 +11,7 @@ import com.university.RoomReservation.model.enums.ReservationStatus;
 import com.university.RoomReservation.repository.ReservationRepository;
 import com.university.RoomReservation.repository.RoomRepository;
 import com.university.RoomReservation.repository.UserRepository;
-import com.university.RoomReservation.request.ReservationRequest;
+import com.university.RoomReservation.request.CreateReservationRequest;
 import com.university.RoomReservation.response.ReservationResponse;
 import com.university.RoomReservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class ReservationServiceImpl implements ReservationService {
     private final UserRepository userRepository;
 
     @Override
-    public ReservationResponse createReservation(ReservationRequest request) {
+    public ReservationResponse createReservation(CreateReservationRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
         Room room = roomRepository.findById(request.getRoomId())
@@ -50,7 +50,7 @@ public class ReservationServiceImpl implements ReservationService {
         return ReservationMapper.mapToDto(reservation);
     }
 
-    private Reservation createSpecificReservation(ReservationRequest dto) {
+    private Reservation createSpecificReservation(CreateReservationRequest dto) {
         ReservationPurpose reservationPurpose = ReservationPurpose.fromValue(dto.getReservationPurpose());
         Reservation reservation = null;
         switch (reservationPurpose) {

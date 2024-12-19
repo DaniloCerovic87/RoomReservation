@@ -1,6 +1,6 @@
 package com.university.RoomReservation.controller;
 
-import com.university.RoomReservation.request.ReservationRequest;
+import com.university.RoomReservation.request.CreateReservationRequest;
 import com.university.RoomReservation.response.ReservationResponse;
 import com.university.RoomReservation.service.ReservationService;
 import jakarta.validation.Valid;
@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/reservations")
+@RequestMapping("/api/reservations")
 @RequiredArgsConstructor
 public class ReservationController {
 
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
+    public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody CreateReservationRequest request) {
         ReservationResponse createdReservation = reservationService.createReservation(request);
         return new ResponseEntity<>(createdReservation, HttpStatus.CREATED);
     }
