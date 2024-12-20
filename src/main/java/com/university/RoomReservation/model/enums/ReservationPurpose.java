@@ -17,7 +17,7 @@ public enum ReservationPurpose {
 
     public static ReservationPurpose fromValue(String value) {
         for (ReservationPurpose purpose : ReservationPurpose.values()) {
-            if (purpose.value.equalsIgnoreCase(value)) {
+            if (purpose.value.equals(value)) {
                 return purpose;
             }
         }

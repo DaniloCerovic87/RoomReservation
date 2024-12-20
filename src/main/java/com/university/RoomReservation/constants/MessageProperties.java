@@ -36,4 +36,14 @@ public class MessageProperties {
     public static final String UNKNOWN_RESERVATION_PURPOSE = "unknown.reservation.purpose";
 
 
+    public static final String UNKNOWN_ROOM_TYPE = "unknown.room.type";
+    public static final String COMPUTER_INVALID_COUNT = "room.computer.invalid.count";
+    public static final String COMPUTERS_NOT_ALLOWED = "room.computers.not.allowed";
+
+
+    public static final String ROOM_NAME_NOT_BLANK = "room.name.not.blank";
+    public static final String ROOM_TYPE_NOT_BLANK = "room.type.not.blank";
+    public static final String ROOM_CAPACITY_NOT_NULL = "room.capacity.not.null";
+    public static final String ROOM_CAPACITY_POSITIVE = "room.capacity.positive";
+
 }

@@ -15,7 +15,7 @@ public enum ClassType {
 
     public static ClassType fromValue(String value) {
         for (ClassType purpose : ClassType.values()) {
-            if (purpose.value.equalsIgnoreCase(value)) {
+            if (purpose.value.equals(value)) {
                 return purpose;
             }
         }

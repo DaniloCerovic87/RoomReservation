@@ -16,7 +16,7 @@ public enum ExamType {
 
     public static ExamType fromValue(String value) {
         for (ExamType type : ExamType.values()) {
-            if (type.value.equalsIgnoreCase(value)) {
+            if (type.value.equals(value)) {
                 return type;
             }
         }

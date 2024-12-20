@@ -6,12 +6,15 @@ import com.university.RoomReservation.exception.response.ApiError;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -21,13 +24,17 @@ public class RestExceptionHandler {
 
     private final MessageSource messageSource;
 
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleArgumentNotValid(MethodArgumentNotValidException ex) {
-        String errorMessage = messageSource.getMessage(ex.getMessage(), new Object[]{}, LocaleContextHolder.getLocale());
+        List<String> errorMessages = ex.getBindingResult().getFieldErrors().stream()
+                .map(fieldError ->  messageSource.getMessage(fieldError.getDefaultMessage(), new Object[]{}, LocaleContextHolder.getLocale()))
+                .collect(Collectors.toList());
         ApiError apiError = ApiError.builder()
                 .status(BAD_REQUEST.value())
-                .message("Malformed request")
-                .debugMessage(errorMessage).build();
+                .message("Validation failed")
+                .errorMessages(errorMessages)
+                .build();
         return buildResponseEntity(apiError);
     }
 
