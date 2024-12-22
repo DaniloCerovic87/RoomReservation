@@ -19,6 +19,7 @@ public class Employee {
     private String lastName;
 
     @NotBlank
+    @Column(unique = true)
     private String email;
 
     @NotBlank
@@ -26,6 +27,10 @@ public class Employee {
 
     @NotBlank
     private String department;
+
+    @NotBlank
+    @Column(unique = true)
+    private String personalId;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
