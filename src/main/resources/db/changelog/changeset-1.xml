@@ -24,7 +24,7 @@
                 email       VARCHAR(50)  NOT NULL,
                 title       VARCHAR(255) NOT NULL,
                 department  VARCHAR(255) NOT NULL,
-                user_id     BIGINT       NOT NULL,
+                user_id     BIGINT       NULL,
                 CONSTRAINT uk_employee_personal_id UNIQUE (personal_id),
                 CONSTRAINT uk_employee_email UNIQUE (email),
                 CONSTRAINT fk_employee_user FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
