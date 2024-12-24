@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
@@ -24,7 +24,7 @@
                 email       VARCHAR(50)  NOT NULL,
                 title       VARCHAR(255) NOT NULL,
                 department  VARCHAR(255) NOT NULL,
-                user_id     BIGINT       NULL,
+                user_id     BIGINT NULL,
                 CONSTRAINT uk_employee_personal_id UNIQUE (personal_id),
                 CONSTRAINT uk_employee_email UNIQUE (email),
                 CONSTRAINT fk_employee_user FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
@@ -95,6 +95,35 @@
 
             INSERT INTO employee (first_name, last_name, personal_id, email, title, department, user_id)
             VALUES ('Marko', 'Markovic', '12345', 'marko.markovic@gmail.com', 'Assistant', 'IT', 2);
+        </sql>
+    </changeSet>
+
+    <changeSet id="03-employee-import-tables" author="danilo.cerovic">
+        <sql>
+            CREATE TABLE employee_file
+            (
+                id                   BIGINT AUTO_INCREMENT PRIMARY KEY,
+                created_at           TIMESTAMP,
+                file_name            VARCHAR(255) NOT NULL,
+                user_id              BIGINT       NOT NULL,
+                employee_file_status VARCHAR(255) NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES user (id)
+            );
+
+            CREATE TABLE employee_row
+            (
+                id                  BIGINT AUTO_INCREMENT PRIMARY KEY,
+                first_name          VARCHAR(255),
+                last_name           VARCHAR(255),
+                personal_id         VARCHAR(255),
+                email               VARCHAR(255),
+                title               VARCHAR(255),
+                department          VARCHAR(255),
+                employee_file_id    BIGINT       NOT NULL,
+                message             TEXT,
+                employee_row_status VARCHAR(255) NOT NULL,
+                FOREIGN KEY (employee_file_id) REFERENCES employee_file (id)
+            );
         </sql>
     </changeSet>
 

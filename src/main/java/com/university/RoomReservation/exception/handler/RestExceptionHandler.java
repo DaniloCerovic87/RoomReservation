@@ -6,7 +6,6 @@ import com.university.RoomReservation.exception.response.ApiError;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,7 +27,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleArgumentNotValid(MethodArgumentNotValidException ex) {
         List<String> errorMessages = ex.getBindingResult().getFieldErrors().stream()
-                .map(fieldError ->  messageSource.getMessage(fieldError.getDefaultMessage(), new Object[]{}, LocaleContextHolder.getLocale()))
+                .map(fieldError -> messageSource.getMessage(fieldError.getDefaultMessage(), new Object[]{}, LocaleContextHolder.getLocale()))
                 .collect(Collectors.toList());
         ApiError apiError = ApiError.builder()
                 .status(BAD_REQUEST.value())

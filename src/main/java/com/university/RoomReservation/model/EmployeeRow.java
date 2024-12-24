@@ -1,45 +1,46 @@
 package com.university.RoomReservation.model;
 
+import com.university.RoomReservation.model.enums.EmployeeRowStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Employee {
+@EntityListeners(AuditingEntityListener.class)
+public class EmployeeRow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     private String firstName;
 
-    @NotBlank
     private String lastName;
 
-    @NotBlank
-    @Column(unique = true)
     private String personalId;
 
-    @NotBlank
-    @Column(unique = true)
     private String email;
 
-    @NotBlank
     private String title;
 
-    @NotBlank
     private String department;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id")
-    private User user;
+    private String message;
+
+    @Enumerated(EnumType.STRING)
+    private EmployeeRowStatus employeeRowStatus;
+
+    @ManyToOne
+    @JoinColumn(name = "employee_file_id")
+    @NotNull
+    private EmployeeFile employeeFile;
 
 }

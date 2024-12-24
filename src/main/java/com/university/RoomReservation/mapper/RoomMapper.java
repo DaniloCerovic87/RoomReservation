@@ -1,17 +1,17 @@
 package com.university.RoomReservation.mapper;
 
+import com.university.RoomReservation.dto.RoomDTO;
 import com.university.RoomReservation.model.Room;
 import com.university.RoomReservation.model.enums.RoomType;
 import com.university.RoomReservation.request.CreateRoomRequest;
 import com.university.RoomReservation.request.UpdateRoomRequest;
-import com.university.RoomReservation.response.RoomResponse;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RoomMapper {
 
-    public static RoomResponse toRoomResponse(Room room) {
-        return RoomResponse.builder()
+    public static RoomDTO toRoomResponse(Room room) {
+        return RoomDTO.builder()
                 .id(room.getId())
                 .name(room.getName())
                 .roomType(room.getRoomType().getValue())
@@ -26,6 +26,15 @@ public class RoomMapper {
                 .roomType(RoomType.fromValue(request.getRoomType()))
                 .capacity(request.getCapacity())
                 .numberOfComputers(request.getNumberOfComputers())
+                .build();
+    }
+
+    public static Room toRoom(RoomDTO roomDTO) {
+        return Room.builder()
+                .name(roomDTO.getName())
+                .roomType(RoomType.fromValue(roomDTO.getRoomType()))
+                .capacity(roomDTO.getCapacity())
+                .numberOfComputers(roomDTO.getNumberOfComputers())
                 .build();
     }
 

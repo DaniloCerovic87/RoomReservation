@@ -1,11 +1,11 @@
-package com.university.RoomReservation.response;
+package com.university.RoomReservation.dto;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-public class ReservationResponse {
+public class ReservationDTO {
 
     private Long id;
 

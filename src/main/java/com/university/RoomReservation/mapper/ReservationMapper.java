@@ -1,15 +1,15 @@
 package com.university.RoomReservation.mapper;
 
+import com.university.RoomReservation.dto.ReservationDTO;
 import com.university.RoomReservation.model.*;
 import com.university.RoomReservation.model.enums.ReservationPurpose;
-import com.university.RoomReservation.response.ReservationResponse;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class ReservationMapper {
 
-    public static ReservationResponse mapToDto(Reservation reservation) {
-        ReservationResponse response = new ReservationResponse();
+    public static ReservationDTO toDTO(Reservation reservation) {
+        ReservationDTO response = new ReservationDTO();
         response.setId(reservation.getId());
         response.setUserId(reservation.getUser().getId());
         response.setRoomId(reservation.getRoom().getId());

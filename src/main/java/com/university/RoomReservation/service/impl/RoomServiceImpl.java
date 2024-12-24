@@ -1,5 +1,6 @@
 package com.university.RoomReservation.service.impl;
 
+import com.university.RoomReservation.dto.RoomDTO;
 import com.university.RoomReservation.exception.ResourceNotFoundException;
 import com.university.RoomReservation.exception.ValidationException;
 import com.university.RoomReservation.mapper.RoomMapper;
@@ -8,7 +9,6 @@ import com.university.RoomReservation.model.enums.RoomType;
 import com.university.RoomReservation.repository.RoomRepository;
 import com.university.RoomReservation.request.CreateRoomRequest;
 import com.university.RoomReservation.request.UpdateRoomRequest;
-import com.university.RoomReservation.response.RoomResponse;
 import com.university.RoomReservation.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,28 +24,28 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
 
     @Override
-    public List<RoomResponse> getAllRooms() {
+    public List<RoomDTO> getAllRooms() {
         return roomRepository.findAll().stream()
                 .map(RoomMapper::toRoomResponse)
                 .toList();
     }
 
     @Override
-    public RoomResponse getRoomById(Long id) {
+    public RoomDTO getRoomById(Long id) {
         Room room = roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ROOM_NOT_FOUND));
         return RoomMapper.toRoomResponse(room);
     }
 
     @Override
-    public RoomResponse createRoom(CreateRoomRequest request) {
+    public RoomDTO createRoom(CreateRoomRequest request) {
         validateRoom(request.getRoomType(), request.getNumberOfComputers());
         Room room = RoomMapper.toRoom(request);
         return RoomMapper.toRoomResponse(roomRepository.save(room));
     }
 
     @Override
-    public RoomResponse updateRoom(Long id, UpdateRoomRequest request) {
+    public RoomDTO updateRoom(Long id, UpdateRoomRequest request) {
         Room room = roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ROOM_NOT_FOUND));
         validateRoom(request.getRoomType(), request.getNumberOfComputers());

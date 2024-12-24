@@ -1,4 +1,4 @@
-package com.university.RoomReservation.response;
+package com.university.RoomReservation.dto;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RoomResponse {
+public class RoomDTO {
 
     private Long id;
 
