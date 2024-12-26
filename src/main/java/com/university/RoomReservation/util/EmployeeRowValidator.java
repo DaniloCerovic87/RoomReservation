@@ -2,8 +2,10 @@ package com.university.RoomReservation.util;
 
 import com.university.RoomReservation.dto.EmployeeRowDTO;
 import com.university.RoomReservation.exception.InvalidCellContentException;
+import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
+@UtilityClass
 public class EmployeeRowValidator {
 
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-zA-Z]{2,6}$";
