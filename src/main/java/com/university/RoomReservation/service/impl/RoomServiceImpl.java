@@ -57,7 +57,7 @@ public class RoomServiceImpl implements RoomService {
         if (!roomRepository.existsById(id)) {
             throw new ResourceNotFoundException(ROOM_NOT_FOUND);
         }
-        // maybe delete reservations if not any in progress or reserved
+        //TODO - ask professor what is the best way to fetch reservations
         roomRepository.deleteById(id);
     }
 
