@@ -4,7 +4,7 @@ import com.university.RoomReservation.dto.EmployeeRowDTO;
 import com.university.RoomReservation.exception.InvalidCellContentException;
 import org.apache.commons.lang3.StringUtils;
 
-public class EmployeeValidator {
+public class EmployeeRowValidator {
 
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-zA-Z]{2,6}$";
     private static final String PERSONAL_ID_REGEX = "^[A-Za-z0-9]{6,20}$";

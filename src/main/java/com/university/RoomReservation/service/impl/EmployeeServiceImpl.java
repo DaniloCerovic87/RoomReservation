@@ -10,7 +10,7 @@ import com.university.RoomReservation.repository.EmployeeRepository;
 import com.university.RoomReservation.service.EmployeeFileService;
 import com.university.RoomReservation.service.EmployeeRowService;
 import com.university.RoomReservation.service.EmployeeService;
-import com.university.RoomReservation.util.EmployeeValidator;
+import com.university.RoomReservation.util.EmployeeRowValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -36,7 +36,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             Long employeeRowId = employeeRow.getId();
             try {
                 employeeRowService.updateEmployeeRowStatus(employeeRowId, EmployeeRowStatus.NEW, null);
-                EmployeeValidator.validateCellsInputFormat(employeeRow);
+                EmployeeRowValidator.validateCellsInputFormat(employeeRow);
                 validateIntegrityAndSave(employeeRow);
                 employeeRowService.updateEmployeeRowStatus(employeeRowId, EmployeeRowStatus.SUCCESS, null);
             } catch (InvalidCellContentException | EntityExistsException e) {
