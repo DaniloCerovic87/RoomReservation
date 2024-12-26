@@ -32,7 +32,7 @@ public class EmployeeRowServiceImpl implements EmployeeRowService {
     }
 
     @Override
-    public List<EmployeeRowDTO> parseAndStoreAccessPointRows(MultipartFile file, Long fileId) {
+    public List<EmployeeRowDTO> parseAndStoreEmployeeRows(MultipartFile file, Long fileId) {
         List<EmployeeRowDTO> importedEmployeeData = new ArrayList<>();
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);

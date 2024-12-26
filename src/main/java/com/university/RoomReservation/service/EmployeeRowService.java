@@ -10,7 +10,7 @@ public interface EmployeeRowService {
 
     List<EmployeeRowDTO> findEmployeeRowsByFileId(Long fileId);
 
-    List<EmployeeRowDTO> parseAndStoreAccessPointRows(MultipartFile file, Long fileId);
+    List<EmployeeRowDTO> parseAndStoreEmployeeRows(MultipartFile file, Long fileId);
 
     void updateEmployeeRowStatus(Long rowId, EmployeeRowStatus status, String message);
 }

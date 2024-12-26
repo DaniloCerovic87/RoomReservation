@@ -20,6 +20,8 @@ import com.university.RoomReservation.util.ReservationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ReservationServiceImpl implements ReservationService {
@@ -29,6 +31,12 @@ public class ReservationServiceImpl implements ReservationService {
     private final RoomService roomService;
 
     private final ReservationRepository reservationRepository;
+
+    public List<ReservationDTO> getReservationsByRoom(Long roomId) {
+        return reservationRepository.findByRoomId(roomId).stream()
+                .map(ReservationMapper::toDTO)
+                .toList();
+    }
 
     @Override
     public ReservationDTO createReservation(CreateReservationRequest request) {

@@ -29,7 +29,7 @@ public class ImportServiceImpl implements ImportService {
     public void importEmployees(MultipartFile file, Long userId) {
         EmployeeFileDTO fileDTO = employeeFileService.validateAndCreateFile(file.getOriginalFilename(), userId);
         Long fileId = fileDTO.getId();
-        List<EmployeeRowDTO> employees = employeeRowService.parseAndStoreAccessPointRows(file, fileId);
+        List<EmployeeRowDTO> employees = employeeRowService.parseAndStoreEmployeeRows(file, fileId);
 
         if (employees.isEmpty()) {
             employeeFileService.updateEmployeeFileStatus(fileId, EmployeeFileStatus.FAILED);
