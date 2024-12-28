@@ -20,7 +20,6 @@ import com.university.RoomReservation.service.UserService;
 import com.university.RoomReservation.util.ReservationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
