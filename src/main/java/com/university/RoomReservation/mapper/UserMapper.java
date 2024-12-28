@@ -13,10 +13,7 @@ public class UserMapper {
         userDTO.setUsername(user.getUsername());
         userDTO.setPassword(user.getPassword());
         userDTO.setRole(user.getRole().name());
-        if (user.getEmployee() != null) {
-            userDTO.setEmployeeId(user.getEmployee().getId());
-        }
-
+        userDTO.setEmployeeId(user.getEmployee().getId());
         return userDTO;
     }
 
