@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static com.university.RoomReservation.constants.MessageProperties.RESERVATION_NOT_FOUND;
-import static com.university.RoomReservation.constants.MessageProperties.ROOM_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
