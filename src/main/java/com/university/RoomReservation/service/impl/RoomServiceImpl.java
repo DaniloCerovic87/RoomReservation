@@ -39,7 +39,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public RoomDTO createRoom(CreateRoomRequest request) {
         RoomValidator.validateRoom(request.getRoomType(), request.getNumberOfComputers());
-        Room room = RoomMapper.toRoom(request);
+        Room room = RoomMapper.toEntity(request);
         return RoomMapper.toRoomResponse(roomRepository.save(room));
     }
 

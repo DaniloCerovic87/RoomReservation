@@ -20,7 +20,7 @@ public class RoomMapper {
                 .build();
     }
 
-    public static Room toRoom(CreateRoomRequest request) {
+    public static Room toEntity(CreateRoomRequest request) {
         return Room.builder()
                 .name(request.getName())
                 .roomType(RoomType.fromValue(request.getRoomType()))
@@ -29,7 +29,7 @@ public class RoomMapper {
                 .build();
     }
 
-    public static Room toRoom(RoomDTO roomDTO) {
+    public static Room toEntity(RoomDTO roomDTO) {
         return Room.builder()
                 .id(roomDTO.getId())
                 .name(roomDTO.getName())

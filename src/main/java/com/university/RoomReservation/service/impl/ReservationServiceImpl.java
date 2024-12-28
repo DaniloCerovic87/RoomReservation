@@ -49,7 +49,7 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation reservation = createSpecificReservation(request);
 
         reservation.setUser(UserMapper.toEntity(userDTO));
-        reservation.setRoom(RoomMapper.toRoom(roomDTO));
+        reservation.setRoom(RoomMapper.toEntity(roomDTO));
         reservation.setStartTime(request.getStartTime());
         reservation.setEndTime(request.getEndTime());
         reservation.setReservationStatus(ReservationStatus.PENDING);
