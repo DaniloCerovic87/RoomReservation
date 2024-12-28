@@ -8,6 +8,7 @@ public class MessageProperties {
 
     public static final String USER_NOT_FOUND = "user.not.found";
     public static final String ROOM_NOT_FOUND = "room.not.found";
+    public static final String RESERVATION_NOT_FOUND = "reservation.not.found";
 
     public static final String SUBJECT_REQUIRED_FOR_CLASS = "subject.required.for.class";
     public static final String SEMESTER_REQUIRED_FOR_CLASS = "semester.required.for.class";

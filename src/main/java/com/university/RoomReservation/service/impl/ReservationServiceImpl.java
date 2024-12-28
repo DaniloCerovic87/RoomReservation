@@ -3,6 +3,7 @@ package com.university.RoomReservation.service.impl;
 import com.university.RoomReservation.dto.ReservationDTO;
 import com.university.RoomReservation.dto.RoomDTO;
 import com.university.RoomReservation.dto.UserDTO;
+import com.university.RoomReservation.exception.ResourceNotFoundException;
 import com.university.RoomReservation.mapper.ReservationMapper;
 import com.university.RoomReservation.mapper.RoomMapper;
 import com.university.RoomReservation.mapper.UserMapper;
@@ -21,6 +22,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static com.university.RoomReservation.constants.MessageProperties.RESERVATION_NOT_FOUND;
+import static com.university.RoomReservation.constants.MessageProperties.ROOM_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -98,4 +102,11 @@ public class ReservationServiceImpl implements ReservationService {
         return reservation;
     }
 
+    @Override
+    public void deleteReservation(Long id) {
+        if (!reservationRepository.existsById(id)) {
+            throw new ResourceNotFoundException(RESERVATION_NOT_FOUND);
+        }
+        reservationRepository.deleteById(id);
+    }
 }
