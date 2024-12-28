@@ -1,6 +1,7 @@
 package com.university.RoomReservation.mapper;
 
 import com.university.RoomReservation.dto.UserDTO;
+import com.university.RoomReservation.model.Employee;
 import com.university.RoomReservation.model.User;
 import com.university.RoomReservation.model.enums.Role;
 
@@ -27,6 +28,7 @@ public class UserMapper {
 
         Role role = Role.valueOf(userDTO.getRole());
         user.setRole(role);
+        user.setEmployee(Employee.builder().id(userDTO.getId()).build());
         return user;
     }
 }

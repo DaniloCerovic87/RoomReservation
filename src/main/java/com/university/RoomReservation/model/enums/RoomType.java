@@ -16,7 +16,7 @@ public enum RoomType {
 
     public static RoomType fromValue(String value) {
         for (RoomType type : RoomType.values()) {
-            if (type.value.equals(value)) {
+            if (type.value.equalsIgnoreCase(value)) {
                 return type;
             }
         }

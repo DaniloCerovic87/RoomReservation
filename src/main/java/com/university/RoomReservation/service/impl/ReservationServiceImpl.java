@@ -20,6 +20,7 @@ import com.university.RoomReservation.service.UserService;
 import com.university.RoomReservation.util.ReservationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -107,5 +108,12 @@ public class ReservationServiceImpl implements ReservationService {
             throw new ResourceNotFoundException(RESERVATION_NOT_FOUND);
         }
         reservationRepository.deleteById(id);
+    }
+
+    @Override
+    public ReservationDTO getReservationById(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(RESERVATION_NOT_FOUND));
+        return ReservationMapper.toDTO(reservation);
     }
 }

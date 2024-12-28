@@ -1,6 +1,7 @@
 package com.university.RoomReservation.controller;
 
 import com.university.RoomReservation.dto.ReservationDTO;
+import com.university.RoomReservation.dto.RoomDTO;
 import com.university.RoomReservation.request.CreateReservationRequest;
 import com.university.RoomReservation.service.ReservationService;
 import jakarta.validation.Valid;
@@ -15,6 +16,11 @@ import org.springframework.web.bind.annotation.*;
 public class ReservationController {
 
     private final ReservationService reservationService;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ReservationDTO> getReservationById(@PathVariable Long id) {
+        return ResponseEntity.ok(reservationService.getReservationById(id));
+    }
 
     @PostMapping
     public ResponseEntity<ReservationDTO> createReservation(@Valid @RequestBody CreateReservationRequest request) {

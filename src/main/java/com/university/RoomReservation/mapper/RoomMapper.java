@@ -31,6 +31,7 @@ public class RoomMapper {
 
     public static Room toRoom(RoomDTO roomDTO) {
         return Room.builder()
+                .id(roomDTO.getId())
                 .name(roomDTO.getName())
                 .roomType(RoomType.fromValue(roomDTO.getRoomType()))
                 .capacity(roomDTO.getCapacity())
