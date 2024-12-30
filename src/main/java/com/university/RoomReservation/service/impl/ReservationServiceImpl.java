@@ -1,39 +1,36 @@
 package com.university.RoomReservation.service.impl;
 
 import com.university.RoomReservation.dto.ReservationDTO;
-import com.university.RoomReservation.dto.RoomDTO;
-import com.university.RoomReservation.dto.UserDTO;
 import com.university.RoomReservation.exception.ResourceNotFoundException;
 import com.university.RoomReservation.mapper.ReservationMapper;
-import com.university.RoomReservation.mapper.RoomMapper;
-import com.university.RoomReservation.mapper.UserMapper;
 import com.university.RoomReservation.model.*;
 import com.university.RoomReservation.model.enums.ClassType;
 import com.university.RoomReservation.model.enums.ExamType;
 import com.university.RoomReservation.model.enums.ReservationPurpose;
 import com.university.RoomReservation.model.enums.ReservationStatus;
 import com.university.RoomReservation.repository.ReservationRepository;
+import com.university.RoomReservation.repository.RoomRepository;
+import com.university.RoomReservation.repository.UserRepository;
 import com.university.RoomReservation.request.ReservationRequest;
 import com.university.RoomReservation.service.ReservationService;
-import com.university.RoomReservation.service.RoomService;
-import com.university.RoomReservation.service.UserService;
 import com.university.RoomReservation.util.ReservationValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.university.RoomReservation.constants.MessageProperties.RESERVATION_NOT_FOUND;
+import static com.university.RoomReservation.constants.MessageProperties.*;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationServiceImpl implements ReservationService {
 
-    private final UserService userService;
-
-    private final RoomService roomService;
-
     private final ReservationRepository reservationRepository;
+
+    private final UserRepository userRepository;
+
+    private final RoomRepository roomRepository;
+
 
     public List<ReservationDTO> getReservationsByRoom(Long roomId) {
         return reservationRepository.findByRoomId(roomId).stream()
@@ -43,13 +40,15 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public ReservationDTO createReservation(ReservationRequest request) {
-        UserDTO userDTO = userService.getUserById(request.getUserId());
-        RoomDTO roomDTO = roomService.getRoomById(request.getRoomId());
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND));
+        Room room = roomRepository.findById(request.getRoomId())
+                .orElseThrow(() -> new ResourceNotFoundException(ROOM_NOT_FOUND));
 
         Reservation reservation = createSpecificReservation(request);
 
-        reservation.setUser(UserMapper.toEntity(userDTO));
-        reservation.setRoom(RoomMapper.toEntity(roomDTO));
+        reservation.setUser(user);
+        reservation.setRoom(room);
         reservation.setStartTime(request.getStartTime());
         reservation.setEndTime(request.getEndTime());
         reservation.setReservationStatus(ReservationStatus.PENDING);

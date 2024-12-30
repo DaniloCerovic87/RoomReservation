@@ -2,8 +2,10 @@ package com.university.RoomReservation.service.impl;
 
 import com.university.RoomReservation.dto.RoomDTO;
 import com.university.RoomReservation.exception.ResourceNotFoundException;
+import com.university.RoomReservation.exception.ValidationException;
 import com.university.RoomReservation.mapper.RoomMapper;
 import com.university.RoomReservation.model.Room;
+import com.university.RoomReservation.repository.ReservationRepository;
 import com.university.RoomReservation.repository.RoomRepository;
 import com.university.RoomReservation.request.RoomRequest;
 import com.university.RoomReservation.service.RoomService;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.university.RoomReservation.constants.MessageProperties.RESERVATION_EXISTS_FOR_ROOM;
 import static com.university.RoomReservation.constants.MessageProperties.ROOM_NOT_FOUND;
 
 @Service
@@ -20,6 +23,8 @@ import static com.university.RoomReservation.constants.MessageProperties.ROOM_NO
 public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
+
+    private final ReservationRepository reservationRepository;
 
     @Override
     public List<RoomDTO> getAllRooms() {
@@ -56,7 +61,11 @@ public class RoomServiceImpl implements RoomService {
         if (!roomRepository.existsById(id)) {
             throw new ResourceNotFoundException(ROOM_NOT_FOUND);
         }
-        //TODO - ask professor what is the best way to fetch reservations
+
+        if (reservationRepository.existsByRoomId(id)) {
+            throw new ValidationException(RESERVATION_EXISTS_FOR_ROOM);
+        }
+
         roomRepository.deleteById(id);
     }
 
