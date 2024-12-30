@@ -1,8 +1,7 @@
 package com.university.RoomReservation.controller;
 
 import com.university.RoomReservation.dto.ReservationDTO;
-import com.university.RoomReservation.dto.RoomDTO;
-import com.university.RoomReservation.request.CreateReservationRequest;
+import com.university.RoomReservation.request.ReservationRequest;
 import com.university.RoomReservation.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationDTO> createReservation(@Valid @RequestBody CreateReservationRequest request) {
+    public ResponseEntity<ReservationDTO> createReservation(@Valid @RequestBody ReservationRequest request) {
         ReservationDTO createdReservation = reservationService.createReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdReservation);
     }

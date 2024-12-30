@@ -13,7 +13,7 @@ import com.university.RoomReservation.model.enums.ExamType;
 import com.university.RoomReservation.model.enums.ReservationPurpose;
 import com.university.RoomReservation.model.enums.ReservationStatus;
 import com.university.RoomReservation.repository.ReservationRepository;
-import com.university.RoomReservation.request.CreateReservationRequest;
+import com.university.RoomReservation.request.ReservationRequest;
 import com.university.RoomReservation.service.ReservationService;
 import com.university.RoomReservation.service.RoomService;
 import com.university.RoomReservation.service.UserService;
@@ -42,7 +42,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ReservationDTO createReservation(CreateReservationRequest request) {
+    public ReservationDTO createReservation(ReservationRequest request) {
         UserDTO userDTO = userService.getUserById(request.getUserId());
         RoomDTO roomDTO = roomService.getRoomById(request.getRoomId());
 
@@ -59,7 +59,7 @@ public class ReservationServiceImpl implements ReservationService {
         return ReservationMapper.toDTO(reservation);
     }
 
-    private Reservation createSpecificReservation(CreateReservationRequest request) {
+    private Reservation createSpecificReservation(ReservationRequest request) {
         ReservationPurpose reservationPurpose = ReservationPurpose.fromValue(request.getReservationPurpose());
         Reservation reservation = null;
         switch (reservationPurpose) {

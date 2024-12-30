@@ -5,8 +5,7 @@ import com.university.RoomReservation.exception.ResourceNotFoundException;
 import com.university.RoomReservation.mapper.RoomMapper;
 import com.university.RoomReservation.model.Room;
 import com.university.RoomReservation.repository.RoomRepository;
-import com.university.RoomReservation.request.CreateRoomRequest;
-import com.university.RoomReservation.request.UpdateRoomRequest;
+import com.university.RoomReservation.request.RoomRequest;
 import com.university.RoomReservation.service.RoomService;
 import com.university.RoomReservation.util.RoomValidator;
 import lombok.RequiredArgsConstructor;
@@ -37,14 +36,14 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public RoomDTO createRoom(CreateRoomRequest request) {
+    public RoomDTO createRoom(RoomRequest request) {
         RoomValidator.validateRoom(request.getRoomType(), request.getNumberOfComputers());
         Room room = RoomMapper.toEntity(request);
         return RoomMapper.toRoomResponse(roomRepository.save(room));
     }
 
     @Override
-    public RoomDTO updateRoom(Long id, UpdateRoomRequest request) {
+    public RoomDTO updateRoom(Long id, RoomRequest request) {
         Room room = roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ROOM_NOT_FOUND));
         RoomValidator.validateRoom(request.getRoomType(), request.getNumberOfComputers());

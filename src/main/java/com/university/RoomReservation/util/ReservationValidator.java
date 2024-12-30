@@ -1,7 +1,7 @@
 package com.university.RoomReservation.util;
 
 import com.university.RoomReservation.exception.ValidationException;
-import com.university.RoomReservation.request.CreateReservationRequest;
+import com.university.RoomReservation.request.ReservationRequest;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
@@ -10,7 +10,7 @@ import static com.university.RoomReservation.constants.MessageProperties.*;
 @UtilityClass
 public class ReservationValidator {
 
-    public static void validateClassReservation(CreateReservationRequest request) {
+    public static void validateClassReservation(ReservationRequest request) {
         if (StringUtils.isBlank(request.getSubject())) {
             throw new ValidationException(SUBJECT_REQUIRED_FOR_CLASS);
         }
@@ -22,7 +22,7 @@ public class ReservationValidator {
         }
     }
 
-    public static void validateExamReservation(CreateReservationRequest request) {
+    public static void validateExamReservation(ReservationRequest request) {
         if (StringUtils.isBlank(request.getSubject())) {
             throw new ValidationException(SUBJECT_REQUIRED_FOR_EXAM);
         }
@@ -34,7 +34,7 @@ public class ReservationValidator {
         }
     }
 
-    public static void validateMeetingReservation(CreateReservationRequest request) {
+    public static void validateMeetingReservation(ReservationRequest request) {
         if (StringUtils.isBlank(request.getMeetingName())) {
             throw new ValidationException(MEETING_NAME_REQUIRED);
         }
@@ -43,7 +43,7 @@ public class ReservationValidator {
         }
     }
 
-    public static void validateEventReservation(CreateReservationRequest request) {
+    public static void validateEventReservation(ReservationRequest request) {
         if (StringUtils.isBlank(request.getEventName())) {
             throw new ValidationException(EVENT_NAME_REQUIRED);
         }

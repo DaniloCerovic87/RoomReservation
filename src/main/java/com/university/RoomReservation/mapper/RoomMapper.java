@@ -3,8 +3,7 @@ package com.university.RoomReservation.mapper;
 import com.university.RoomReservation.dto.RoomDTO;
 import com.university.RoomReservation.model.Room;
 import com.university.RoomReservation.model.enums.RoomType;
-import com.university.RoomReservation.request.CreateRoomRequest;
-import com.university.RoomReservation.request.UpdateRoomRequest;
+import com.university.RoomReservation.request.RoomRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,7 +19,7 @@ public class RoomMapper {
                 .build();
     }
 
-    public static Room toEntity(CreateRoomRequest request) {
+    public static Room toEntity(RoomRequest request) {
         return Room.builder()
                 .name(request.getName())
                 .roomType(RoomType.fromValue(request.getRoomType()))
@@ -39,7 +38,7 @@ public class RoomMapper {
                 .build();
     }
 
-    public static void updateRoomFromRequest(UpdateRoomRequest request, Room room) {
+    public static void updateRoomFromRequest(RoomRequest request, Room room) {
         room.setName(request.getName());
         room.setRoomType(RoomType.fromValue(request.getRoomType()));
         room.setCapacity(request.getCapacity());

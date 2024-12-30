@@ -1,8 +1,7 @@
 package com.university.RoomReservation.controller;
 
 import com.university.RoomReservation.dto.RoomDTO;
-import com.university.RoomReservation.request.CreateRoomRequest;
-import com.university.RoomReservation.request.UpdateRoomRequest;
+import com.university.RoomReservation.request.RoomRequest;
 import com.university.RoomReservation.service.RoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,13 +29,13 @@ public class RoomController {
     }
 
     @PostMapping
-    public ResponseEntity<RoomDTO> createRoom(@Valid @RequestBody CreateRoomRequest request) {
+    public ResponseEntity<RoomDTO> createRoom(@Valid @RequestBody RoomRequest request) {
         RoomDTO createdRoom = roomService.createRoom(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdRoom);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RoomDTO> updateRoom(@PathVariable Long id, @Valid @RequestBody UpdateRoomRequest request) {
+    public ResponseEntity<RoomDTO> updateRoom(@PathVariable Long id, @Valid @RequestBody RoomRequest request) {
         RoomDTO updatedRoom = roomService.updateRoom(id, request);
         return ResponseEntity.ok(updatedRoom);
     }

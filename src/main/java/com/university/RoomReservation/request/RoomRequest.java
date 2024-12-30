@@ -10,7 +10,7 @@ import static com.university.RoomReservation.constants.MessageProperties.*;
 
 @Data
 @Builder
-public class UpdateRoomRequest {
+public class RoomRequest {
 
     @NotBlank(message = ROOM_NAME_NOT_BLANK)
     private String name;

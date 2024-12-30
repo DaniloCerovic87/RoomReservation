@@ -1,7 +1,7 @@
 package com.university.RoomReservation.service;
 
 import com.university.RoomReservation.dto.ReservationDTO;
-import com.university.RoomReservation.request.CreateReservationRequest;
+import com.university.RoomReservation.request.ReservationRequest;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ public interface ReservationService {
 
     List<ReservationDTO> getReservationsByRoom(Long roomId);
 
-    ReservationDTO createReservation(CreateReservationRequest request);
+    ReservationDTO createReservation(ReservationRequest request);
 
     void deleteReservation(Long id);
 
