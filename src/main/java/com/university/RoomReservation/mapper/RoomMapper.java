@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RoomMapper {
 
-    public static RoomDTO toRoomResponse(Room room) {
+    public static RoomDTO toDto(Room room) {
         return RoomDTO.builder()
                 .id(room.getId())
                 .name(room.getName())

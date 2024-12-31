@@ -29,7 +29,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public List<RoomDTO> getAllRooms() {
         return roomRepository.findAll().stream()
-                .map(RoomMapper::toRoomResponse)
+                .map(RoomMapper::toDto)
                 .toList();
     }
 
@@ -37,14 +37,14 @@ public class RoomServiceImpl implements RoomService {
     public RoomDTO getRoomById(Long id) {
         Room room = roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(ROOM_NOT_FOUND));
-        return RoomMapper.toRoomResponse(room);
+        return RoomMapper.toDto(room);
     }
 
     @Override
     public RoomDTO createRoom(RoomRequest request) {
         RoomValidator.validateRoom(request.getRoomType(), request.getNumberOfComputers());
         Room room = RoomMapper.toEntity(request);
-        return RoomMapper.toRoomResponse(roomRepository.save(room));
+        return RoomMapper.toDto(roomRepository.save(room));
     }
 
     @Override
@@ -53,7 +53,7 @@ public class RoomServiceImpl implements RoomService {
                 .orElseThrow(() -> new ResourceNotFoundException(ROOM_NOT_FOUND));
         RoomValidator.validateRoom(request.getRoomType(), request.getNumberOfComputers());
         RoomMapper.updateRoomFromRequest(request, room);
-        return RoomMapper.toRoomResponse(roomRepository.save(room));
+        return RoomMapper.toDto(roomRepository.save(room));
     }
 
     @Override
