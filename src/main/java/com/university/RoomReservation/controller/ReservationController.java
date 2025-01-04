@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/reservations")
 @RequiredArgsConstructor
@@ -32,4 +34,10 @@ public class ReservationController {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/rooms/{id}")
+    public ResponseEntity<List<ReservationDTO>> getReservationByRoom(@PathVariable("id") Long roomId) {
+        return ResponseEntity.ok(reservationService.getReservationsByRoom(roomId));
+    }
+
 }
