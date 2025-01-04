@@ -36,6 +36,7 @@ public class MessageProperties {
     public static final String RESERVATION_END_TIME_FUTURE_OR_PRESENT = "reservation.endTime.futureOrPresent";
     public static final String RESERVATION_PURPOSE_NOT_BLANK = "reservation.purpose.notBlank";
     public static final String UNKNOWN_RESERVATION_PURPOSE = "unknown.reservation.purpose";
+    public static final String UNKNOWN_RESERVATION_STATUS = "unknown.reservation.status";
 
 
     public static final String UNKNOWN_ROOM_TYPE = "unknown.room.type";
