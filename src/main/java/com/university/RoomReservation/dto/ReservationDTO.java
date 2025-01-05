@@ -13,6 +13,10 @@ public class ReservationDTO {
 
     private Long roomId;
 
+    private String employeeFullName;
+
+    private String roomName;
+
     private LocalDateTime startTime;
 
     private LocalDateTime endTime;

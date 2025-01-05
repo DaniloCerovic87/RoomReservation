@@ -11,8 +11,16 @@ public class ReservationMapper {
     public static ReservationDTO toDTO(Reservation reservation) {
         ReservationDTO response = new ReservationDTO();
         response.setId(reservation.getId());
-        response.setUserId(reservation.getUser().getId());
-        response.setRoomId(reservation.getRoom().getId());
+        User user = reservation.getUser();
+
+        response.setUserId(user.getId());
+        Room room = reservation.getRoom();
+
+        response.setRoomId(room.getId());
+        response.setRoomName(room.getName());
+
+        Employee employee = user.getEmployee();
+        response.setEmployeeFullName(employee.getFirstName() + " " + employee.getLastName());
         response.setStartTime(reservation.getStartTime());
         response.setEndTime(reservation.getEndTime());
         response.setReservationPurpose(ReservationPurpose.fromValue(reservation.getReservationPurpose()).getValue());
