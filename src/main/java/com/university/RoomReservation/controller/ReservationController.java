@@ -1,15 +1,20 @@
 package com.university.RoomReservation.controller;
 
 import com.university.RoomReservation.dto.ReservationDTO;
+import com.university.RoomReservation.request.ReservationFilterFormRequest;
 import com.university.RoomReservation.request.ReservationRequest;
 import com.university.RoomReservation.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -17,6 +22,12 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+
+    @GetMapping
+    public ResponseEntity<Page<ReservationDTO>> findReservations(ReservationFilterFormRequest filterForm, Pageable pageable) {
+        Page<ReservationDTO> page = reservationService.findReservations(filterForm, pageable);
+        return new ResponseEntity<>(page, OK);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ReservationDTO> getReservationById(@PathVariable Long id) {

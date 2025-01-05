@@ -11,10 +11,13 @@ import com.university.RoomReservation.model.enums.ReservationStatus;
 import com.university.RoomReservation.repository.ReservationRepository;
 import com.university.RoomReservation.repository.RoomRepository;
 import com.university.RoomReservation.repository.UserRepository;
+import com.university.RoomReservation.request.ReservationFilterFormRequest;
 import com.university.RoomReservation.request.ReservationRequest;
 import com.university.RoomReservation.service.ReservationService;
 import com.university.RoomReservation.util.ReservationValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +34,33 @@ public class ReservationServiceImpl implements ReservationService {
 
     private final RoomRepository roomRepository;
 
+    @Override
+    public Page<ReservationDTO> findReservations(ReservationFilterFormRequest filterForm, Pageable pageable) {
+        Class<?> type = null;
+        if (filterForm.getReservationPurpose() != null) {
+            ReservationPurpose reservationPurpose = ReservationPurpose.fromValue(filterForm.getReservationPurpose());
+
+            switch (reservationPurpose) {
+                case CLASS -> type = ClassReservation.class;
+                case EXAM -> type = ExamReservation.class;
+                case MEETING -> type = MeetingReservation.class;
+                case EVENT -> type = EventReservation.class;
+            }
+        }
+
+        ReservationStatus reservationStatus = null;
+        if (filterForm.getStatus() != null) {
+            reservationStatus = ReservationStatus.fromValue(filterForm.getStatus());
+        }
+
+        return reservationRepository.findReservationsWithFilters(
+                type,
+                filterForm.getStartDate(),
+                filterForm.getEndDate(),
+                reservationStatus,
+                filterForm.getRoomName(),
+                pageable).map(ReservationMapper::toDTO);
+    }
 
     public List<ReservationDTO> getReservationsByRoom(Long roomId) {
         return reservationRepository.findByRoomId(roomId).stream()
