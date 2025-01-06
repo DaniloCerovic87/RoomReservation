@@ -80,7 +80,7 @@ public class ReservationServiceImpl implements ReservationService {
         Room room = roomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException(ROOM_NOT_FOUND));
 
-        Reservation reservation = createSpecificReservation(request);
+        Reservation reservation = validateAndCreateSpecificReservation(request);
 
         reservation.setUser(user);
         reservation.setRoom(room);
@@ -163,7 +163,7 @@ public class ReservationServiceImpl implements ReservationService {
         }
     }
 
-    private Reservation createSpecificReservation(ReservationRequest request) {
+    private Reservation validateAndCreateSpecificReservation(ReservationRequest request) {
         ReservationPurpose reservationPurpose = ReservationPurpose.fromValue(request.getReservationPurpose());
         Reservation reservation = null;
         switch (reservationPurpose) {
