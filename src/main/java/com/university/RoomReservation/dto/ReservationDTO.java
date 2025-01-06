@@ -23,6 +23,8 @@ public class ReservationDTO {
 
     private String reservationPurpose;
 
+    private String reservationStatus;
+
     private String subject;
 
     private Integer semester;

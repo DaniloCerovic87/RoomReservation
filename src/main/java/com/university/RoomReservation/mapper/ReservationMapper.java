@@ -24,6 +24,7 @@ public class ReservationMapper {
         reservationDTO.setStartTime(reservation.getStartTime());
         reservationDTO.setEndTime(reservation.getEndTime());
         reservationDTO.setReservationPurpose(ReservationPurpose.fromValue(reservation.getReservationPurpose()).getValue());
+        reservationDTO.setReservationStatus(reservation.getReservationStatus().getValue());
 
         if (reservation instanceof ClassReservation classReservation) {
             reservationDTO.setSubject(classReservation.getSubject());
