@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 public class ReservationFilterFormRequest {
 
     private String roomName;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private String status;
     private String reservationPurpose;
 

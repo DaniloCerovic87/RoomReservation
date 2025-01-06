@@ -18,5 +18,7 @@ public interface ReservationService {
 
     ReservationDTO getReservationById(Long id);
 
+    ReservationDTO updateReservation(Long id, ReservationRequest request);
+
     Page<ReservationDTO> findReservations(ReservationFilterFormRequest filterForm, Pageable pageable);
 }

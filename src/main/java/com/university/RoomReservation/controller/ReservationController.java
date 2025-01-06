@@ -40,6 +40,12 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdReservation);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ReservationDTO> updateReservation(@PathVariable Long id, @Valid @RequestBody ReservationRequest request) {
+        ReservationDTO updatedReservation = reservationService.updateReservation(id, request);
+        return ResponseEntity.ok(updatedReservation);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         reservationService.deleteReservation(id);
