@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 public class MessageProperties {
 
     public static final String USER_NOT_FOUND = "user.not.found";
+    public static final String EMPLOYEE_NOT_FOUND = "employee.not.found";
     public static final String ROOM_NOT_FOUND = "room.not.found";
     public static final String RESERVATION_NOT_FOUND = "reservation.not.found";
     public static final String RESERVATION_EXISTS_FOR_ROOM = "reservation.exists.for.room";
@@ -21,6 +22,7 @@ public class MessageProperties {
     public static final String SEMESTER_REQUIRED_FOR_EXAM = "semester.required.for.exam";
     public static final String EXAM_TYPE_REQUIRED = "exam.type.required";
     public static final String UNKNOWN_EXAM_TYPE = "unknown.exam.type";
+    public static final String UNKNOWN_ROLE = "unknown.role";
 
 
     public static final String MEETING_NAME_REQUIRED = "meeting.name.required";
@@ -48,5 +50,12 @@ public class MessageProperties {
     public static final String ROOM_TYPE_NOT_BLANK = "room.type.not.blank";
     public static final String ROOM_CAPACITY_NOT_NULL = "room.capacity.not.null";
     public static final String ROOM_CAPACITY_POSITIVE = "room.capacity.positive";
+
+    public static final String EMPLOYEE_ID_NOT_NULL = "employee.id.not.null";
+    public static final String ROLE_NOT_BLANK = "role.not.blank";
+    public static final String USERNAME_NOT_BLANK = "username.not.blank";
+    public static final String PASSWORD_NOT_BLANK = "password.not.blank";
+
+    public static final String USER_ALREADY_ASSIGNED = "user.already.assigned";
 
 }

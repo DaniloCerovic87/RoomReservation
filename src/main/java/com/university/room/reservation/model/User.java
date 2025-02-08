@@ -30,7 +30,7 @@ public class User {
     @NotNull
     private Role role;
 
-    @OneToOne(mappedBy = "user", optional = false)
+    @OneToOne(mappedBy = "user", optional = false, fetch = FetchType.LAZY)
     private Employee employee;
 
 }
