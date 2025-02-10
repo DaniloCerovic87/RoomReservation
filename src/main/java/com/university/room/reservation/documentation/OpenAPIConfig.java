@@ -31,6 +31,33 @@ public class OpenAPIConfig {
                 .paths(new Paths()
                         .addPathItem("/api/reservations", generateReservationsPathItem())
                         .addPathItem("/api/reservations/{id}", generateReservationsByIdPathItem())
+                        .addPathItem("/api/reservations/rooms/{id}", generateReservationsByRoomIdPathItem())
+                );
+    }
+
+    private PathItem generateReservationsByRoomIdPathItem() {
+        return new PathItem()
+                .get(getReservationsByRoomOperation());
+    }
+
+    private Operation getReservationsByRoomOperation() {
+        return new Operation()
+                .operationId("getReservationsByRoomId")
+                .summary("Get reservations by room ID")
+                .description("Retrieve list of reservations by room ID")
+                .addParametersItem(new Parameter()
+                        .name("id")
+                        .description("Room ID")
+                        .required(true)
+                        .in(ParameterIn.PATH.toString()))
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
+                                .description("Reservations successfully retrieved")
+                                .content(new Content().addMediaType(
+                                        "application/json",
+                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/ReservationDTO"))
+                                ))
+                        )
                 );
     }
 
@@ -168,7 +195,7 @@ public class OpenAPIConfig {
                         .required(true)
                         .in(ParameterIn.PATH.toString()))
                 .responses(new ApiResponses()
-                        .addApiResponse(String.valueOf(HttpStatus.CREATED.value()), new ApiResponse()
+                        .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
                                 .description("Reservation details retrieved successfully")
                                 .content(new Content().addMediaType(
                                         "application/json",
@@ -176,7 +203,7 @@ public class OpenAPIConfig {
                                 ))
                         )
                         .addApiResponse(String.valueOf(HttpStatus.NOT_FOUND.value()), new ApiResponse()
-                                .description("Employee not found")));
+                                .description("Reservation not found")));
     }
 
     private Operation deleteReservationByIdOperation() {
