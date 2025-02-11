@@ -32,32 +32,10 @@ public class OpenAPIConfig {
                         .addPathItem("/api/reservations", generateReservationsPathItem())
                         .addPathItem("/api/reservations/{id}", generateReservationsByIdPathItem())
                         .addPathItem("/api/reservations/rooms/{id}", generateReservationsByRoomIdPathItem())
-                );
-    }
 
-    private PathItem generateReservationsByRoomIdPathItem() {
-        return new PathItem()
-                .get(getReservationsByRoomOperation());
-    }
+                        .addPathItem("/api/rooms", generateRoomsPathItem())
+                        .addPathItem("/api/rooms/{id}", generateRoomsByIdPathItem())
 
-    private Operation getReservationsByRoomOperation() {
-        return new Operation()
-                .operationId("getReservationsByRoomId")
-                .summary("Get reservations by room ID")
-                .description("Retrieve list of reservations by room ID")
-                .addParametersItem(new Parameter()
-                        .name("id")
-                        .description("Room ID")
-                        .required(true)
-                        .in(ParameterIn.PATH.toString()))
-                .responses(new ApiResponses()
-                        .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
-                                .description("Reservations successfully retrieved")
-                                .content(new Content().addMediaType(
-                                        "application/json",
-                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/ReservationDTO"))
-                                ))
-                        )
                 );
     }
 
@@ -147,6 +125,35 @@ public class OpenAPIConfig {
                                 .description("Invalid input")));
     }
 
+    private PathItem generateReservationsByIdPathItem() {
+        return new PathItem()
+                .get(getReservationByIdOperation())
+                .put(updateReservationOperation())
+                .delete(deleteReservationOperation());
+    }
+
+    private Operation getReservationByIdOperation() {
+        return new Operation()
+                .operationId("getReservationById")
+                .summary("Get a reservation by ID")
+                .description("Retrieve reservation details based on reservation ID")
+                .addParametersItem(new Parameter()
+                        .name("id")
+                        .description("Reservation ID")
+                        .required(true)
+                        .in(ParameterIn.PATH.toString()))
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
+                                .description("Reservation details retrieved successfully")
+                                .content(new Content().addMediaType(
+                                        "application/json",
+                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/ReservationDTO"))
+                                ))
+                        )
+                        .addApiResponse(String.valueOf(HttpStatus.NOT_FOUND.value()), new ApiResponse()
+                                .description("Reservation not found")));
+    }
+
     private Operation updateReservationOperation() {
         return new Operation()
                 .operationId("updateReservation")
@@ -176,37 +183,7 @@ public class OpenAPIConfig {
                         ));
     }
 
-    private PathItem generateReservationsByIdPathItem() {
-        return new PathItem()
-                .get(getReservationByIdOperation())
-                .put(updateReservationOperation())
-                .delete(deleteReservationByIdOperation());
-
-    }
-
-    private Operation getReservationByIdOperation() {
-        return new Operation()
-                .operationId("getReservationById")
-                .summary("Get a reservation by ID")
-                .description("Retrieve reservation details based on reservation ID")
-                .addParametersItem(new Parameter()
-                        .name("id")
-                        .description("Reservation ID")
-                        .required(true)
-                        .in(ParameterIn.PATH.toString()))
-                .responses(new ApiResponses()
-                        .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
-                                .description("Reservation details retrieved successfully")
-                                .content(new Content().addMediaType(
-                                        "application/json",
-                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/ReservationDTO"))
-                                ))
-                        )
-                        .addApiResponse(String.valueOf(HttpStatus.NOT_FOUND.value()), new ApiResponse()
-                                .description("Reservation not found")));
-    }
-
-    private Operation deleteReservationByIdOperation() {
+    private Operation deleteReservationOperation() {
         return new Operation()
                 .operationId("deleteReservation")
                 .summary("Delete a reservation by ID")
@@ -221,6 +198,159 @@ public class OpenAPIConfig {
                                 new ApiResponse().description(("Reservation successfully deleted")))
                         .addApiResponse(String.valueOf(HttpStatus.NOT_FOUND.value()),
                                 new ApiResponse().description(("Reservation not found"))));
+    }
+
+    private PathItem generateReservationsByRoomIdPathItem() {
+        return new PathItem()
+                .get(getReservationsByRoomOperation());
+    }
+
+    private Operation getReservationsByRoomOperation() {
+        return new Operation()
+                .operationId("getReservationsByRoom")
+                .summary("Get reservations by room ID")
+                .description("Retrieve list of reservations by room ID")
+                .addParametersItem(new Parameter()
+                        .name("id")
+                        .description("Room ID")
+                        .required(true)
+                        .in(ParameterIn.PATH.toString()))
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
+                                .description("Reservations successfully retrieved")
+                                .content(new Content().addMediaType(
+                                        "application/json",
+                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/ReservationDTO"))
+                                ))
+                        )
+                );
+    }
+
+
+    private PathItem generateRoomsPathItem() {
+        return new PathItem()
+                .get(getRoomsOperation())
+                .post(createRoomOperation());
+    }
+
+    private Operation createRoomOperation() {
+        return new Operation()
+                .operationId("createRoom")
+                .summary("Create a new room")
+                .description("Create a new room in the system")
+                .requestBody(new RequestBody()
+                        .description("Create room details")
+                        .required(true)
+                        .content(new Content()
+                                .addMediaType("application/json", new MediaType()
+                                        .schema(new Schema<>().$ref("#/components/schemas/RoomRequest"))
+                                )
+                        )
+                )
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.CREATED.value()), new ApiResponse()
+                                .description("Room successfully created")
+                                .content(new Content().addMediaType(
+                                        "application/json",
+                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/RoomDTO"))
+                                ))
+                        )
+                        .addApiResponse(String.valueOf(HttpStatus.BAD_REQUEST.value()), new ApiResponse()
+                                .description("Invalid input")));
+    }
+
+    private Operation getRoomsOperation() {
+        return new Operation()
+                .operationId("getAllRooms")
+                .summary("Find all rooms")
+                .description("Retrieve a list of all rooms in the system")
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
+                                .description("Rooms successfully retrieved")
+                                .content(new Content()
+                                        .addMediaType("application/json", new MediaType()
+                                                .schema(new ArraySchema()
+                                                        .items(new Schema<>().$ref("#/components/schemas/RoomDTO"))
+                                                )
+                                        )
+                                )
+                        )
+                );
+    }
+
+    private PathItem generateRoomsByIdPathItem() {
+        return new PathItem()
+                .get(getRoomByIdOperation())
+                .put(updateRoomOperation())
+                .delete(deleteRoomOperation());
+    }
+
+    private Operation getRoomByIdOperation() {
+        return new Operation()
+                .operationId("getRoomById")
+                .summary("Get a room by ID")
+                .description("Retrieve room details based on room ID")
+                .addParametersItem(new Parameter()
+                        .name("id")
+                        .description("Room ID")
+                        .required(true)
+                        .in(ParameterIn.PATH.toString()))
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
+                                .description("Room details retrieved successfully")
+                                .content(new Content().addMediaType(
+                                        "application/json",
+                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/RoomDTO"))
+                                ))
+                        )
+                        .addApiResponse(String.valueOf(HttpStatus.NOT_FOUND.value()), new ApiResponse()
+                                .description("Room not found")));
+    }
+
+    private Operation updateRoomOperation() {
+        return new Operation()
+                .operationId("updateRoom")
+                .summary("Update a room")
+                .description("Update an existing room")
+                .requestBody(new RequestBody()
+                        .description("Updated room details")
+                        .required(true)
+                        .content(new Content()
+                                .addMediaType("application/json", new MediaType()
+                                        .schema(new Schema<>().$ref("#/components/schemas/RoomRequest"))
+                                )
+                        )
+                )
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
+                                .description("Room updated successfully")
+                                .content(new Content()
+                                        .addMediaType("application/json", new MediaType()
+                                                .schema(new Schema<>()
+                                                        .$ref("#/components/schemas/RoomDTO"))
+                                        )
+                                )
+                        )
+                        .addApiResponse(String.valueOf(HttpStatus.BAD_REQUEST.value()), new ApiResponse()
+                                .description("Invalid input")
+                        ));
+    }
+
+    private Operation deleteRoomOperation() {
+        return new Operation()
+                .operationId("deleteRoom")
+                .summary("Delete a room by ID")
+                .description("Delete a room from the system")
+                .addParametersItem(new Parameter()
+                        .name("id")
+                        .description("Room ID")
+                        .required(true)
+                        .in(ParameterIn.PATH.toString()))
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.NO_CONTENT.value()),
+                                new ApiResponse().description(("Room successfully deleted")))
+                        .addApiResponse(String.valueOf(HttpStatus.NOT_FOUND.value()),
+                                new ApiResponse().description(("Room not found"))));
     }
 
 }
