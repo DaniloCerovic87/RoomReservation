@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 
 @Configuration
@@ -36,6 +37,7 @@ public class OpenAPIConfig {
                         .addPathItem("/api/rooms", generateRoomsPathItem())
                         .addPathItem("/api/rooms/{id}", generateRoomsByIdPathItem())
 
+                        .addPathItem("/api/import/employees", generateImportEmployeesPathItem())
                 );
     }
 
@@ -351,6 +353,41 @@ public class OpenAPIConfig {
                                 new ApiResponse().description(("Room successfully deleted")))
                         .addApiResponse(String.valueOf(HttpStatus.NOT_FOUND.value()),
                                 new ApiResponse().description(("Room not found"))));
+    }
+
+    private PathItem generateImportEmployeesPathItem() {
+        return new PathItem()
+                .post(importEmployeesOperation());
+    }
+
+    private Operation importEmployeesOperation() {
+        return new Operation()
+                .operationId("importEmployees")
+                .summary("Import employee data from an Excel file")
+                .description("Import employees from an Excel (.xlsx) file containing columns: firstName, lastName, personalId, email, title, department.")
+                .requestBody(new RequestBody()
+                        .description("Excel file (.xlsx) containing employee data to be imported. The file should have the following columns: firstName, lastName, personalId, email, title, department.")
+                        .required(true)
+                        .content(new Content()
+                                .addMediaType("multipart/form-data", new MediaType())
+                        )
+                )
+                .parameters(Collections.singletonList(
+                        new Parameter()
+                                .name("userId")
+                                .description("ID of the user initiating the import")
+                                .required(true)
+                                .in(ParameterIn.PATH.toString()))
+                )
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
+                                .description("File successfully uploaded. Processing has started asynchronously."))
+                        .addApiResponse(String.valueOf(HttpStatus.NOT_FOUND.value()), new ApiResponse()
+                                .description("User not found"))
+                        .addApiResponse(String.valueOf(HttpStatus.BAD_REQUEST.value()), new ApiResponse()
+                                .description("Another import file is currently being processed. Please wait until the operation is complete before proceeding with a new one.")
+                        )
+                );
     }
 
 }
