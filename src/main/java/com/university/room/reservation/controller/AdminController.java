@@ -19,4 +19,5 @@ public class AdminController {
         adminService.createUserForEmployee(createUserRequest);
         return ResponseEntity.ok().build();
     }
+
 }

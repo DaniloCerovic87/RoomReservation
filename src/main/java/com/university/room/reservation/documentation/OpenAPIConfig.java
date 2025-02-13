@@ -401,7 +401,7 @@ public class OpenAPIConfig {
         return new Operation()
                 .operationId("findAllEmployeeFiles")
                 .summary("Find all employee import files")
-                .description("Retrieve a list of all employee import files that have been uploaded to the system.")
+                .description("Retrieve a list of all employee import files that have been uploaded to the system")
                 .responses(new ApiResponses()
                         .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
                                 .description("Employee files successfully retrieved")
