@@ -401,7 +401,11 @@ public class OpenAPIConfig {
         return new Operation()
                 .operationId("findAllEmployeeFiles")
                 .summary("Find all employee import files")
-                .description("Retrieve a list of all employee import files that have been uploaded to the system")
+                .description("""
+                        Retrieve a list of all employee import files that have been uploaded to the system. Status of data processing:
+                         - IN_PROGRESS: The data processing is ongoing
+                         - FAILED: An unexpected error occurred during the file upload process
+                         - FINISHED: The data processing has been successfully completed""")
                 .responses(new ApiResponses()
                         .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
                                 .description("Employee files successfully retrieved")
