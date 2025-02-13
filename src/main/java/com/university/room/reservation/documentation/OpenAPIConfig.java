@@ -38,6 +38,8 @@ public class OpenAPIConfig {
                         .addPathItem("/api/rooms/{id}", generateRoomsByIdPathItem())
 
                         .addPathItem("/api/import/employees", generateImportEmployeesPathItem())
+
+                        .addPathItem("/api/employee-files", generateEmployeeFilesPathItem())
                 );
     }
 
@@ -389,5 +391,30 @@ public class OpenAPIConfig {
                         )
                 );
     }
+
+    private PathItem generateEmployeeFilesPathItem() {
+        return new PathItem()
+                .get(findAllEmployeeFilesOperation());
+    }
+
+    private Operation findAllEmployeeFilesOperation() {
+        return new Operation()
+                .operationId("findAllEmployeeFiles")
+                .summary("Find all employee import files")
+                .description("Retrieve a list of all employee import files that have been uploaded to the system.")
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
+                                .description("Employee files successfully retrieved")
+                                .content(new Content()
+                                        .addMediaType("application/json", new MediaType()
+                                                .schema(new ArraySchema()
+                                                        .items(new Schema<>().$ref("#/components/schemas/EmployeeFileDTO"))
+                                                )
+                                        )
+                                )
+                        )
+                );
+    }
+
 
 }
