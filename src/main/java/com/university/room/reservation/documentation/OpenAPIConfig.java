@@ -40,6 +40,8 @@ public class OpenAPIConfig {
                         .addPathItem("/api/import/employees", generateImportEmployeesPathItem())
 
                         .addPathItem("/api/employee-files", generateEmployeeFilesPathItem())
+
+                        .addPathItem("/api/employee-rows/{fileId}", generateEmployeeRowsByFileIdPathItem())
                 );
     }
 
@@ -420,5 +422,32 @@ public class OpenAPIConfig {
                 );
     }
 
+    private PathItem generateEmployeeRowsByFileIdPathItem() {
+        return new PathItem()
+                .get(findAllEmployeeRowsByFileIdOperation());
+    }
+
+    private Operation findAllEmployeeRowsByFileIdOperation() {
+        return new Operation()
+                .operationId("findEmployeeRowsByFileId")
+                .summary("Find employee rows by file ID")
+                .description("Retrieve employee rows based on uploaded file ID")
+                .addParametersItem(new Parameter()
+                        .name("id")
+                        .description("File ID")
+                        .required(true)
+                        .in(ParameterIn.PATH.toString()))
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.OK.value()), new ApiResponse()
+                                .description("Employee rows retrieved successfully")
+                                .content(new Content().addMediaType(
+                                        "application/json",
+                                        new MediaType().schema(new Schema<>().$ref("#/components/schemas/EmployeeRowDTO"))
+                                ))
+                        )
+                        .addApiResponse(String.valueOf(HttpStatus.BAD_REQUEST.value()), new ApiResponse()
+                                .description("Invalid input")
+                        ));
+    }
 
 }
