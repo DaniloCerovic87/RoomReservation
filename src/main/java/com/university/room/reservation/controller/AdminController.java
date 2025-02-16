@@ -20,4 +20,16 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/reservations/{id}/approve")
+    public ResponseEntity<Void> approveReservation(@PathVariable Long id) {
+        adminService.approveReservation(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reservations/{id}/decline")
+    public ResponseEntity<Void> declineReservation(@PathVariable Long id) {
+        adminService.declineReservation(id);
+        return ResponseEntity.ok().build();
+    }
+
 }

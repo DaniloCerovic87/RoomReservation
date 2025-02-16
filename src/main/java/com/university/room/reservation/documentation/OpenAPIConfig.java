@@ -80,7 +80,7 @@ public class OpenAPIConfig {
                         new Parameter()
                                 .name("status")
                                 .in("query")
-                                .description("Reservation status (Pending, Approved, Rejected)")
+                                .description("Reservation status (Pending, Approved, Declined)")
                                 .required(false)
                                 .schema(new StringSchema()),
                         new Parameter()

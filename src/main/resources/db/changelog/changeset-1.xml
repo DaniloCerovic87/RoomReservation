@@ -46,7 +46,7 @@
                 end_time            DATETIME NOT NULL,
                 user_id             BIGINT   NOT NULL,
                 room_id             BIGINT   NOT NULL,
-                reservation_status  ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL,
+                reservation_status  ENUM('PENDING', 'APPROVED', 'DECLINED') NOT NULL,
                 reservation_purpose ENUM('CLASS', 'EXAM', 'MEETING', 'EVENT') NOT NULL,
                 subject             VARCHAR(255),
                 semester            INT,

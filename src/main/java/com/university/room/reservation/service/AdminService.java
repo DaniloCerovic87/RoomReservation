@@ -6,4 +6,7 @@ public interface AdminService {
 
     void createUserForEmployee(CreateUserRequest createUserRequest);
 
+    void approveReservation(Long id);
+
+    void declineReservation(Long id);
 }

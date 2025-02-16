@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 public enum ReservationStatus {
     PENDING("Pending"),
     APPROVED("Approved"),
-    REJECTED("Rejected");
+    DECLINED("Declined");
 
     private final String value;
 
