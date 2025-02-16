@@ -42,6 +42,8 @@ public class OpenAPIConfig {
                         .addPathItem("/api/employee-files", generateEmployeeFilesPathItem())
 
                         .addPathItem("/api/employee-rows/{fileId}", generateEmployeeRowsByFileIdPathItem())
+
+                        .addPathItem("/api/admin/createUserForEmployee", generateCreateUserForEmployeePathItem())
                 );
     }
 
@@ -448,6 +450,33 @@ public class OpenAPIConfig {
                         .addApiResponse(String.valueOf(HttpStatus.BAD_REQUEST.value()), new ApiResponse()
                                 .description("Invalid input")
                         ));
+    }
+
+    private PathItem generateCreateUserForEmployeePathItem() {
+        return new PathItem()
+                .post(createCreateUserForEmployeeOperation());
+    }
+
+    private Operation createCreateUserForEmployeeOperation() {
+        return new Operation()
+                .operationId("createUserForEmployee")
+                .summary("Create a user for employee")
+                .description("Create a new user in the system and assign it to the employee")
+                .requestBody(new RequestBody()
+                        .description("Details of the user to be created, including the ID of the existing employee to whom the user will be assigned")
+                        .required(true)
+                        .content(new Content()
+                                .addMediaType("application/json", new MediaType()
+                                        .schema(new Schema<>().$ref("#/components/schemas/CreateUserRequest"))
+                                )
+                        )
+                )
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.CREATED.value()), new ApiResponse()
+                                .description("User successfully created")
+                        )
+                        .addApiResponse(String.valueOf(HttpStatus.BAD_REQUEST.value()), new ApiResponse()
+                                .description("Invalid input")));
     }
 
 }
