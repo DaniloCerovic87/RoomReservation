@@ -44,6 +44,8 @@ public class OpenAPIConfig {
                         .addPathItem("/api/employee-rows/{fileId}", generateEmployeeRowsByFileIdPathItem())
 
                         .addPathItem("/api/admin/createUserForEmployee", generateCreateUserForEmployeePathItem())
+                        .addPathItem("/api/admin/reservations/{id}/approve", generateApproveReservationPathItem())
+                        .addPathItem("/api/admin/reservations/{id}/decline", generateDeclineReservationPathItem())
                 );
     }
 
@@ -477,6 +479,50 @@ public class OpenAPIConfig {
                         )
                         .addApiResponse(String.valueOf(HttpStatus.BAD_REQUEST.value()), new ApiResponse()
                                 .description("Invalid input")));
+    }
+
+    private PathItem generateApproveReservationPathItem() {
+        return new PathItem()
+                .post(createApproveReservationOperation());
+    }
+
+    private Operation createApproveReservationOperation() {
+        return new Operation()
+                .operationId("approveReservation")
+                .summary("Approve reservation by ID")
+                .description("Approve a reservation by ID")
+                .addParametersItem(new Parameter()
+                        .name("id")
+                        .description("ID of the reservation")
+                        .required(true)
+                        .in(ParameterIn.PATH.toString()))
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.OK.value()),
+                                new ApiResponse().description("Reservation successfully approved"))
+                        .addApiResponse(String.valueOf(HttpStatus.NOT_FOUND.value()),
+                                new ApiResponse().description("Reservation not found")));
+    }
+
+    private PathItem generateDeclineReservationPathItem() {
+        return new PathItem()
+                .post(createDeclineReservationOperation());
+    }
+
+    private Operation createDeclineReservationOperation() {
+        return new Operation()
+                .operationId("declineReservation")
+                .summary("Decline reservation by ID")
+                .description("Decline a reservation by ID")
+                .addParametersItem(new Parameter()
+                        .name("id")
+                        .description("ID of the reservation")
+                        .required(true)
+                        .in(ParameterIn.PATH.toString()))
+                .responses(new ApiResponses()
+                        .addApiResponse(String.valueOf(HttpStatus.OK.value()),
+                                new ApiResponse().description("Reservation successfully declined"))
+                        .addApiResponse(String.valueOf(HttpStatus.NOT_FOUND.value()),
+                                new ApiResponse().description("Reservation not found")));
     }
 
 }
