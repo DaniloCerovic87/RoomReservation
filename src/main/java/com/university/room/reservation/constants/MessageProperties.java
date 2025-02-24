@@ -36,6 +36,7 @@ public class MessageProperties {
     public static final String RESERVATION_START_TIME_FUTURE_OR_PRESENT = "reservation.startTime.futureOrPresent";
     public static final String RESERVATION_END_TIME_NOT_NULL = "reservation.endTime.notNull";
     public static final String RESERVATION_END_TIME_FUTURE_OR_PRESENT = "reservation.endTime.futureOrPresent";
+    public static final String RESERVATION_DURATION_TIME_INVALID = "reservation.duration.time.invalid";
     public static final String RESERVATION_PURPOSE_NOT_BLANK = "reservation.purpose.notBlank";
     public static final String UNKNOWN_RESERVATION_PURPOSE = "unknown.reservation.purpose";
     public static final String UNKNOWN_RESERVATION_STATUS = "unknown.reservation.status";

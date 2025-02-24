@@ -74,6 +74,8 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     public ReservationDTO createReservation(ReservationRequest request) {
+        ReservationValidator.validateReservationDuration(request);
+
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageProperties.USER_NOT_FOUND));
         Room room = roomRepository.findById(request.getRoomId())

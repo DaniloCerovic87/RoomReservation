@@ -6,6 +6,8 @@ import com.university.room.reservation.constants.MessageProperties;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.Duration;
+
 @UtilityClass
 public class ReservationValidator {
 
@@ -48,6 +50,14 @@ public class ReservationValidator {
         }
         if (StringUtils.isBlank(request.getEventDescription())) {
             throw new ValidationException(MessageProperties.EVENT_DESCRIPTION_REQUIRED);
+        }
+    }
+
+    public static void validateReservationDuration(ReservationRequest request) {
+        long durationInMinutes = Duration.between(request.getStartTime(), request.getEndTime()).toMinutes();
+
+        if(durationInMinutes < 5) {
+            throw new ValidationException(MessageProperties.RESERVATION_DURATION_TIME_INVALID);
         }
     }
 
