@@ -1,8 +1,8 @@
 package com.university.room.reservation.util;
 
+import com.university.room.reservation.constants.MessageProperties;
 import com.university.room.reservation.exception.ValidationException;
 import com.university.room.reservation.request.ReservationRequest;
-import com.university.room.reservation.constants.MessageProperties;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
@@ -56,7 +56,7 @@ public class ReservationValidator {
     public static void validateReservationDuration(ReservationRequest request) {
         long durationInMinutes = Duration.between(request.getStartTime(), request.getEndTime()).toMinutes();
 
-        if(durationInMinutes < 5) {
+        if (durationInMinutes < 5) {
             throw new ValidationException(MessageProperties.RESERVATION_DURATION_TIME_INVALID);
         }
     }

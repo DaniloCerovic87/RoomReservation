@@ -1,5 +1,6 @@
 package com.university.room.reservation.service.impl;
 
+import com.university.room.reservation.constants.MessageProperties;
 import com.university.room.reservation.dto.RoomDTO;
 import com.university.room.reservation.exception.ResourceNotFoundException;
 import com.university.room.reservation.exception.ValidationException;
@@ -10,7 +11,6 @@ import com.university.room.reservation.repository.RoomRepository;
 import com.university.room.reservation.request.RoomRequest;
 import com.university.room.reservation.service.RoomService;
 import com.university.room.reservation.util.RoomValidator;
-import com.university.room.reservation.constants.MessageProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

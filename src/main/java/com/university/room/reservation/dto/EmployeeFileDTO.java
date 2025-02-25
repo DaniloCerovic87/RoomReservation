@@ -10,8 +10,12 @@ import java.time.LocalDateTime;
 public class EmployeeFileDTO {
 
     private Long id;
+
     private LocalDateTime createdAt;
+
     private String fileName;
+
     private Long userId;
+
     private String employeeFileStatus;
 }

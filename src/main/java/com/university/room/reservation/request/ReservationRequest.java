@@ -29,12 +29,19 @@ public class ReservationRequest {
     private String reservationPurpose;
 
     private String subject;
+
     private Integer semester;
+
     private String classType;
+
     private String examType;
+
     private String meetingName;
+
     private String meetingDescription;
+
     private String eventName;
+
     private String eventDescription;
 
 }

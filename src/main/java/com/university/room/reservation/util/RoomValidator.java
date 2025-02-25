@@ -1,8 +1,8 @@
 package com.university.room.reservation.util;
 
+import com.university.room.reservation.constants.MessageProperties;
 import com.university.room.reservation.exception.ValidationException;
 import com.university.room.reservation.model.enums.RoomType;
-import com.university.room.reservation.constants.MessageProperties;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
