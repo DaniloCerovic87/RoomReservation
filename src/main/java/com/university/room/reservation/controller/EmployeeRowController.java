@@ -16,7 +16,7 @@ import java.util.List;
 @RequestMapping("/api/employee-rows")
 @RequiredArgsConstructor
 @Slf4j
-public class EmployeeRowsController {
+public class EmployeeRowController {
 
     private final EmployeeRowService employeeRowService;
 

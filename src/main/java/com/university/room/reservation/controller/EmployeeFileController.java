@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/api/employee-files")
 @RequiredArgsConstructor
 @Slf4j
-public class EmployeeFilesController {
+public class EmployeeFileController {
 
     private final EmployeeFileService employeeFileService;
 
