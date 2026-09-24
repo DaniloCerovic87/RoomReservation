@@ -37,6 +37,7 @@ public class MessageProperties {
     public static final String RESERVATION_END_TIME_NOT_NULL = "reservation.endTime.notNull";
     public static final String RESERVATION_END_TIME_FUTURE_OR_PRESENT = "reservation.endTime.futureOrPresent";
     public static final String RESERVATION_DURATION_TIME_INVALID = "reservation.duration.time.invalid";
+    public static final String RESERVATION_TIME_SLOT_INVALID = "reservation.time.slot.invalid";
     public static final String RESERVATION_PURPOSE_NOT_BLANK = "reservation.purpose.notBlank";
     public static final String UNKNOWN_RESERVATION_PURPOSE = "unknown.reservation.purpose";
     public static final String UNKNOWN_RESERVATION_STATUS = "unknown.reservation.status";
@@ -51,6 +52,14 @@ public class MessageProperties {
     public static final String ROOM_TYPE_NOT_BLANK = "room.type.not.blank";
     public static final String ROOM_CAPACITY_NOT_NULL = "room.capacity.not.null";
     public static final String ROOM_CAPACITY_POSITIVE = "room.capacity.positive";
+    public static final String ROOM_AVAILABILITY_DATE_NOT_NULL = "room.availability.date.not.null";
+    public static final String ROOM_AVAILABILITY_START_TIME_NOT_NULL = "room.availability.start.time.not.null";
+    public static final String ROOM_AVAILABILITY_END_TIME_NOT_NULL = "room.availability.end.time.not.null";
+    public static final String ROOM_AVAILABILITY_CAPACITY_NOT_NULL = "room.availability.capacity.not.null";
+    public static final String ROOM_AVAILABILITY_CAPACITY_POSITIVE = "room.availability.capacity.positive";
+    public static final String ROOM_AVAILABILITY_TIME_INVALID = "room.availability.time.invalid";
+    public static final String ROOM_AVAILABILITY_START_TIME_FUTURE_OR_PRESENT = "room.availability.start.time.future.or.present";
+    public static final String ROOM_AVAILABILITY_TIME_SLOT_INVALID = "room.availability.time.slot.invalid";
 
     public static final String EMPLOYEE_ID_NOT_NULL = "employee.id.not.null";
     public static final String ROLE_NOT_BLANK = "role.not.blank";
