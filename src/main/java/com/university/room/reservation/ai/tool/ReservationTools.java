@@ -1,6 +1,8 @@
 package com.university.room.reservation.ai.tool;
 
+import com.university.room.reservation.ai.dto.RoomSearchToolResponse;
 import com.university.room.reservation.ai.request.RoomSearchRequest;
+import com.university.room.reservation.dto.RoomDTO;
 import com.university.room.reservation.exception.ValidationException;
 import com.university.room.reservation.service.RoomService;
 import lombok.RequiredArgsConstructor;
@@ -22,14 +24,18 @@ public class ReservationTools {
               Finds available meeting rooms for a given date, time range, and capacity.
               Use this tool only when the user provided date, start time, end time, and capacity.
               """)
-    public Object findAvailableRooms(RoomSearchRequest request) {
+    public RoomSearchToolResponse findAvailableRooms(RoomSearchRequest request) {
         try {
-            return roomService.findAvailableRooms(
+            List<RoomDTO> rooms = roomService.findAvailableRooms(
                     request.getDate(),
                     request.getStartTime(),
                     request.getEndTime(),
                     request.getCapacity()
             );
+            return RoomSearchToolResponse.builder()
+                    .success(true)
+                    .rooms(rooms)
+                    .build();
         }  catch (ValidationException e) {
                     String message = messageSource.getMessage(
                     e.getMessageKey(),
@@ -37,7 +43,11 @@ public class ReservationTools {
                     LocaleContextHolder.getLocale()
             );
 
-            return "Invalid room search request: " + message;
+            return RoomSearchToolResponse.builder()
+                    .success(false)
+                    .rooms(List.of())
+                    .errorMessage(message)
+                    .build();
         }
     }
 
