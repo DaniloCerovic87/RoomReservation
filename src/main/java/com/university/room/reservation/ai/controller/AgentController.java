@@ -1,6 +1,7 @@
 package com.university.room.reservation.ai.controller;
 
 import com.university.room.reservation.ai.agent.ReservationAgent;
+import com.university.room.reservation.ai.request.AiChatRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,7 +16,7 @@ public class AgentController {
     private final ReservationAgent reservationAgent;
 
     @PostMapping("/chat")
-    public String chat(@RequestBody String message) {
-        return reservationAgent.chat(message);
+    public String chat(@RequestBody AiChatRequest request) {
+        return reservationAgent.chat(request.getConversationId(), request.getMessage());
     }
 }

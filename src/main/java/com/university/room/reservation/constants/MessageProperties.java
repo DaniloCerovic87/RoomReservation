@@ -68,4 +68,6 @@ public class MessageProperties {
 
     public static final String USER_ALREADY_ASSIGNED = "user.already.assigned";
 
+    public static final String AI_PENDING_MEETING_RESERVATION_NOT_FOUND = "ai.pending.meeting.reservation.not.found";
+
 }
