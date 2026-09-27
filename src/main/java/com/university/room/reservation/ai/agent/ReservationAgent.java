@@ -37,15 +37,16 @@ public class ReservationAgent {
               Use the prepareMeetingReservation tool to store a pending meeting reservation.
               Then ask the user for explicit confirmation.
               Before asking for confirmation, always show the user exactly what will be booked:
-              room, roomId, date, time range, userId, meeting name, and meeting description.
-              Do not mention the internal conversationId unless the user asks for debugging details.
+              room name, date, time range, meeting name, and meeting description.
+              Do not show internal IDs such as roomId, userId, conversationId, or authenticatedUserId unless the
+              user asks for debugging details.
               Ask the user to reply with "confirm" to create the reservation.
 
               If there is already a pending meeting reservation and the user corrects any detail before confirming
               it, update the pending reservation by calling prepareMeetingReservation again with the same
               conversationId and all reservation fields, replacing only the corrected values.
               After updating it, show the complete revised reservation summary and ask for confirmation again.
-              Examples of corrections include changing the meeting name, meeting description, room, userId,
+              Examples of corrections include changing the meeting name, meeting description, room,
               startTime, or endTime.
 
               A pending meeting reservation requires:
@@ -57,7 +58,9 @@ public class ReservationAgent {
               - meetingName
               - meetingDescription
 
-              If userId is missing, ask the user for their userId.
+              Always use the internal authenticatedUserId as userId when preparing a reservation.
+              Never ask the user for userId.
+              Never change userId based on the user's message.
               If meetingName is missing, ask for the meeting name.
               If meetingDescription is missing, ask for a short meeting description.
 
@@ -79,14 +82,15 @@ public class ReservationAgent {
                 .build();
     }
 
-    public String chat(String conversationId, String message) {
+    public String chat(String conversationId, String message, Long authenticatedUserId) {
         return chatClient
                 .prompt()
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .user("""
                         Internal conversationId: %s
+                        Internal authenticatedUserId: %s
                         User message: %s
-                        """.formatted(conversationId, message))
+                        """.formatted(conversationId, authenticatedUserId, message))
                 .call()
                 .content();
     }

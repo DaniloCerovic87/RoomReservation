@@ -35,3 +35,8 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:room-reservation-demo-secret-key-change-me-please-32chars}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}

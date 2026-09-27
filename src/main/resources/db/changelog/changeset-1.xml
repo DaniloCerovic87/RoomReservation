@@ -84,10 +84,10 @@
 
 
             INSERT INTO user (username, password, role)
-            VALUES ('Pera', 'fon123', 'USER');
+            VALUES ('Pera', '$2a$10$zVP/rk0Q0oTtC4tf.N2D4OpEy.5mcsZQPuMPVLuYQMpoFMTPGLgJG', 'USER');
 
             INSERT INTO user (username, password, role)
-            VALUES ('Mika', 'fon345', 'ADMIN');
+            VALUES ('Mika', '$2a$10$CeBfIcDGpYCqXboomdLXIer6X04afiu1IkhQ2nzjR7XmBbZu8nEVi', 'ADMIN');
 
 
             INSERT INTO employee (first_name, last_name, personal_id, email, title, department, user_id)
