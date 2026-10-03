@@ -4,9 +4,10 @@ import com.university.room.reservation.ai.dto.ConfirmMeetingReservationResponse;
 import com.university.room.reservation.ai.dto.PendingMeetingReservation;
 import com.university.room.reservation.ai.dto.RoomRecommendationResponse;
 import com.university.room.reservation.ai.dto.RoomSearchToolResponse;
+import com.university.room.reservation.ai.context.AiConversationContext;
 import com.university.room.reservation.ai.request.RoomSearchRequest;
+import com.university.room.reservation.ai.service.AiToolCallLogService;
 import com.university.room.reservation.ai.service.RoomRecommendationService;
-import com.university.room.reservation.ai.store.ConversationUserStore;
 import com.university.room.reservation.ai.store.PendingMeetingReservationStore;
 import com.university.room.reservation.constants.MessageProperties;
 import com.university.room.reservation.dto.ReservationDTO;
@@ -32,9 +33,10 @@ public class ReservationTools {
     private final RoomService roomService;
     private final MessageSource messageSource;
     private final PendingMeetingReservationStore pendingMeetingReservationStore;
-    private final ConversationUserStore conversationUserStore;
     private final ReservationService reservationService;
     private final RoomRecommendationService roomRecommendationService;
+    private final AiToolCallLogService aiToolCallLogService;
+    private final AiConversationContext aiConversationContext;
 
     @Tool(description = """
             Finds available meeting rooms for a given date, time range, capacity, and capacity preference.                                                                                                                                                                                                                   \s
@@ -59,6 +61,10 @@ public class ReservationTools {
             Do not invent recommendation reasons.
             """)
     public RoomSearchToolResponse findAvailableRooms(RoomSearchRequest request) {
+        String conversationId = resolveConversationId(request.getConversationId());
+        request.setConversationId(conversationId);
+        Long userId = resolveUserId();
+
         try {
             List<RoomDTO> rooms = roomService.findAvailableRooms(
                     request.getDate(),
@@ -70,23 +76,30 @@ public class ReservationTools {
             RoomRecommendationResponse recommendation =
                     roomRecommendationService.recommendRoom(rooms, request.getCapacity(), request.getCapacityPreference());
 
-            return RoomSearchToolResponse.builder()
+            RoomSearchToolResponse response = RoomSearchToolResponse.builder()
                     .success(true)
                     .rooms(rooms)
                     .recommendation(recommendation)
                     .build();
-        }  catch (ValidationException e) {
-                    String message = messageSource.getMessage(
-                    e.getMessageKey(),
-                    e.getParams(),
-                    LocaleContextHolder.getLocale()
-            );
 
-            return RoomSearchToolResponse.builder()
+            logToolCall(conversationId, userId, "findAvailableRooms", request, response, true, null);
+
+            return response;
+        }  catch (ValidationException e) {
+            String message = getMessage(e.getMessageKey(), e.getParams());
+
+            RoomSearchToolResponse response = RoomSearchToolResponse.builder()
                     .success(false)
                     .rooms(List.of())
                     .errorMessage(message)
                     .build();
+
+            logToolCall(conversationId, userId, "findAvailableRooms", request, response, false, message);
+
+            return response;
+        } catch (RuntimeException e) {
+            logToolCall(conversationId, userId, "findAvailableRooms", request, null, false, e.getMessage());
+            throw e;
         }
     }
 
@@ -100,7 +113,19 @@ public class ReservationTools {
           After this tool is called, ask the user for explicit confirmation.
           """)
     public PendingMeetingReservation prepareMeetingReservation(PendingMeetingReservation pendingMeetingReservation) {
+        String conversationId = resolveConversationId(pendingMeetingReservation.getConversationId());
+        pendingMeetingReservation.setConversationId(conversationId);
+
         pendingMeetingReservationStore.save(pendingMeetingReservation);
+        logToolCall(
+                conversationId,
+                resolveUserId(),
+                "prepareMeetingReservation",
+                pendingMeetingReservation,
+                pendingMeetingReservation,
+                true,
+                null
+        );
         return pendingMeetingReservation;
     }
 
@@ -110,16 +135,36 @@ public class ReservationTools {
           Requires the internal conversationId for the current conversation.
           """)
     public ConfirmMeetingReservationResponse confirmMeetingReservation(String conversationId) {
-        return pendingMeetingReservationStore.findByConversationId(conversationId)
-                .map(this::createPendingMeetingReservation)
-                .orElseGet(() -> ConfirmMeetingReservationResponse.builder()
-                        .success(false)
-                        .errorMessage(getMessage(MessageProperties.AI_PENDING_MEETING_RESERVATION_NOT_FOUND))
-                        .build());
+        String resolvedConversationId = resolveConversationId(conversationId);
+        Long userId = resolveUserId();
+
+        try {
+            ConfirmMeetingReservationResponse response = pendingMeetingReservationStore.findByConversationId(resolvedConversationId)
+                    .map(this::createPendingMeetingReservation)
+                    .orElseGet(() -> ConfirmMeetingReservationResponse.builder()
+                            .success(false)
+                            .errorMessage(getMessage(MessageProperties.AI_PENDING_MEETING_RESERVATION_NOT_FOUND))
+                            .build());
+
+            logToolCall(
+                    resolvedConversationId,
+                    userId,
+                    "confirmMeetingReservation",
+                    resolvedConversationId,
+                    response,
+                    response.isSuccess(),
+                    response.getErrorMessage()
+            );
+
+            return response;
+        } catch (RuntimeException e) {
+            logToolCall(resolvedConversationId, userId, "confirmMeetingReservation", resolvedConversationId, null, false, e.getMessage());
+            throw e;
+        }
     }
 
     private ConfirmMeetingReservationResponse createPendingMeetingReservation(PendingMeetingReservation pendingMeetingReservation) {
-        Long userId = conversationUserStore.findUserIdByConversationId(pendingMeetingReservation.getConversationId())
+        Long userId = aiConversationContext.getUserId()
                 .orElse(null);
 
         if (userId == null) {
@@ -134,7 +179,6 @@ public class ReservationTools {
         try {
             ReservationDTO reservation = reservationService.createReservation(request);
             pendingMeetingReservationStore.remove(pendingMeetingReservation.getConversationId());
-            conversationUserStore.remove(pendingMeetingReservation.getConversationId());
 
             return ConfirmMeetingReservationResponse.builder()
                     .success(true)
@@ -171,6 +215,25 @@ public class ReservationTools {
                 params,
                 LocaleContextHolder.getLocale()
         );
+    }
+
+    private String resolveConversationId(String conversationId) {
+        return conversationId != null ? conversationId : aiConversationContext.getConversationId().orElse(null);
+    }
+
+    private Long resolveUserId() {
+        return aiConversationContext.getUserId()
+                .orElse(null);
+    }
+
+    private void logToolCall(String conversationId,
+                             Long userId,
+                             String toolName,
+                             Object input,
+                             Object output,
+                             boolean success,
+                             String errorMessage) {
+        aiToolCallLogService.logToolCall(conversationId, userId, toolName, input, output, success, errorMessage);
     }
 
 }

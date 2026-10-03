@@ -11,6 +11,8 @@ import java.time.LocalTime;
 @Setter
 public class RoomSearchRequest {
 
+    private String conversationId;
+
     private LocalDate date;
 
     private LocalTime startTime;

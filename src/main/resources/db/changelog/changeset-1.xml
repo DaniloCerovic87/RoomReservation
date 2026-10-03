@@ -127,4 +127,22 @@
         </sql>
     </changeSet>
 
+    <changeSet id="04-create-ai-tool-call-log-table" author="danilo.cerovic">
+        <sql>
+            CREATE TABLE ai_tool_call_log
+            (
+                id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+                conversation_id VARCHAR(255),
+                user_id         BIGINT,
+                tool_name       VARCHAR(255) NOT NULL,
+                tool_input      TEXT,
+                tool_output     TEXT,
+                success         BOOLEAN NOT NULL,
+                error_message   TEXT,
+                created_at      TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES user (id)
+            );
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
