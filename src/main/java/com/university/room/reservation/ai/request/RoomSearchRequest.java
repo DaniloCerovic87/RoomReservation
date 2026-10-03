@@ -1,5 +1,6 @@
 package com.university.room.reservation.ai.request;
 
+import com.university.room.reservation.ai.enums.CapacityPreference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,5 +18,7 @@ public class RoomSearchRequest {
     private LocalTime endTime;
 
     private Integer capacity;
+
+    private CapacityPreference capacityPreference;
 
 }

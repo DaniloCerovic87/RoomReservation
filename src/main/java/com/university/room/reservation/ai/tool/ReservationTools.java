@@ -35,13 +35,27 @@ public class ReservationTools {
     private final RoomRecommendationService roomRecommendationService;
 
     @Tool(description = """
-              Finds available meeting rooms for a given date, time range, and capacity.
-              Use this tool only when the user provided date, start time, end time, and capacity.
-              When available rooms are returned with a recommendation, present the recommended room first.                                                                                                                                                                                                                     \s
-              Use the recommendation reason from the tool response.                                                                                                                                                                                                                                                            \s
-              Then list the other available rooms as alternatives.                                                                                                                                                                                                                                                             \s
-              Do not invent recommendation reasons.
-              """)
+            Finds available meeting rooms for a given date, time range, capacity, and capacity preference.                                                                                                                                                                                                                   \s
+                                                                                                                                                                                                                                                                                                                              \s
+            Use this tool only when the user provided:                                                                                                                                                                                                                                                                       \s
+             - date                                                                                                                                                                                                                                                                                                           \s
+             - start time                                                                                                                                                                                                                                                                                                     \s
+             - end time                                                                                                                                                                                                                                                                                                       \s
+             - capacity                                                                                                                                                                                                                                                                                                       \s
+                                                                                                                                                                                                                                                                                                                              \s
+            When calling this tool, infer capacityPreference from the user's message.                                                                                                                                                                                                                                        \s
+                                                                                                                                                                                                                                                                                                                              \s
+            Set capacityPreference to MOST_SPACIOUS when the user asks for a larger, more comfortable, spacious, roomy, or not-too-tight room.                                                                                                                                                                               \s
+                                                                                                                                                                                                                                                                                                                              \s
+            Set capacityPreference to CLOSEST_MATCH when the user asks for the smallest suitable room, closest fit, best capacity match, least unused capacity, or does not specify any capacity preference.                                                                                                                 \s
+                                                                                                                                                                                                                                                                                                                              \s
+            Do not mention capacityPreference to the user unless they ask for debugging details.                                                                                                                                                                                                                             \s
+                                                                                                                                                                                                                                                                                                                              \s
+            When available rooms are returned with a recommendation, present the recommended room first.                                                                                                                                                                                                                     \s
+            Use the recommendation reason from the tool response.                                                                                                                                                                                                                                                            \s
+            Then list the other available rooms as alternatives.                                                                                                                                                                                                                                                             \s
+            Do not invent recommendation reasons.
+            """)
     public RoomSearchToolResponse findAvailableRooms(RoomSearchRequest request) {
         try {
             List<RoomDTO> rooms = roomService.findAvailableRooms(
@@ -52,7 +66,7 @@ public class ReservationTools {
             );
 
             RoomRecommendationResponse recommendation =
-                    roomRecommendationService.recommendRoom(rooms, request.getCapacity());
+                    roomRecommendationService.recommendRoom(rooms, request.getCapacity(), request.getCapacityPreference());
 
             return RoomSearchToolResponse.builder()
                     .success(true)
