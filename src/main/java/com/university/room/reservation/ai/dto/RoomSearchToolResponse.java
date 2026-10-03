@@ -16,5 +16,7 @@ public class RoomSearchToolResponse {
 
     private List<RoomDTO> rooms;
 
+    private RoomRecommendationResponse recommendation;
+
     private String errorMessage;
 }

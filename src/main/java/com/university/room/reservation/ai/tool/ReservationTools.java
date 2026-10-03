@@ -2,8 +2,10 @@ package com.university.room.reservation.ai.tool;
 
 import com.university.room.reservation.ai.dto.ConfirmMeetingReservationResponse;
 import com.university.room.reservation.ai.dto.PendingMeetingReservation;
+import com.university.room.reservation.ai.dto.RoomRecommendationResponse;
 import com.university.room.reservation.ai.dto.RoomSearchToolResponse;
 import com.university.room.reservation.ai.request.RoomSearchRequest;
+import com.university.room.reservation.ai.service.RoomRecommendationService;
 import com.university.room.reservation.ai.store.PendingMeetingReservationStore;
 import com.university.room.reservation.constants.MessageProperties;
 import com.university.room.reservation.dto.ReservationDTO;
@@ -30,10 +32,15 @@ public class ReservationTools {
     private final MessageSource messageSource;
     private final PendingMeetingReservationStore pendingMeetingReservationStore;
     private final ReservationService reservationService;
+    private final RoomRecommendationService roomRecommendationService;
 
     @Tool(description = """
               Finds available meeting rooms for a given date, time range, and capacity.
               Use this tool only when the user provided date, start time, end time, and capacity.
+              When available rooms are returned with a recommendation, present the recommended room first.                                                                                                                                                                                                                     \s
+              Use the recommendation reason from the tool response.                                                                                                                                                                                                                                                            \s
+              Then list the other available rooms as alternatives.                                                                                                                                                                                                                                                             \s
+              Do not invent recommendation reasons.
               """)
     public RoomSearchToolResponse findAvailableRooms(RoomSearchRequest request) {
         try {
@@ -43,9 +50,14 @@ public class ReservationTools {
                     request.getEndTime(),
                     request.getCapacity()
             );
+
+            RoomRecommendationResponse recommendation =
+                    roomRecommendationService.recommendRoom(rooms, request.getCapacity());
+
             return RoomSearchToolResponse.builder()
                     .success(true)
                     .rooms(rooms)
+                    .recommendation(recommendation)
                     .build();
         }  catch (ValidationException e) {
                     String message = messageSource.getMessage(
