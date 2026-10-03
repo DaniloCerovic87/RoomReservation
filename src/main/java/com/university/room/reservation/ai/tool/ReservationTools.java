@@ -6,6 +6,7 @@ import com.university.room.reservation.ai.dto.RoomRecommendationResponse;
 import com.university.room.reservation.ai.dto.RoomSearchToolResponse;
 import com.university.room.reservation.ai.request.RoomSearchRequest;
 import com.university.room.reservation.ai.service.RoomRecommendationService;
+import com.university.room.reservation.ai.store.ConversationUserStore;
 import com.university.room.reservation.ai.store.PendingMeetingReservationStore;
 import com.university.room.reservation.constants.MessageProperties;
 import com.university.room.reservation.dto.ReservationDTO;
@@ -31,6 +32,7 @@ public class ReservationTools {
     private final RoomService roomService;
     private final MessageSource messageSource;
     private final PendingMeetingReservationStore pendingMeetingReservationStore;
+    private final ConversationUserStore conversationUserStore;
     private final ReservationService reservationService;
     private final RoomRecommendationService roomRecommendationService;
 
@@ -117,11 +119,22 @@ public class ReservationTools {
     }
 
     private ConfirmMeetingReservationResponse createPendingMeetingReservation(PendingMeetingReservation pendingMeetingReservation) {
-        ReservationRequest request = getReservationRequest(pendingMeetingReservation);
+        Long userId = conversationUserStore.findUserIdByConversationId(pendingMeetingReservation.getConversationId())
+                .orElse(null);
+
+        if (userId == null) {
+            return ConfirmMeetingReservationResponse.builder()
+                    .success(false)
+                    .errorMessage(getMessage(MessageProperties.AI_CONVERSATION_USER_NOT_FOUND))
+                    .build();
+        }
+
+        ReservationRequest request = getReservationRequest(pendingMeetingReservation, userId);
 
         try {
             ReservationDTO reservation = reservationService.createReservation(request);
             pendingMeetingReservationStore.remove(pendingMeetingReservation.getConversationId());
+            conversationUserStore.remove(pendingMeetingReservation.getConversationId());
 
             return ConfirmMeetingReservationResponse.builder()
                     .success(true)
@@ -140,9 +153,9 @@ public class ReservationTools {
         }
     }
 
-    private static ReservationRequest getReservationRequest(PendingMeetingReservation pendingMeetingReservation) {
+    private static ReservationRequest getReservationRequest(PendingMeetingReservation pendingMeetingReservation, Long userId) {
         ReservationRequest request = new ReservationRequest();
-        request.setUserId(pendingMeetingReservation.getUserId());
+        request.setUserId(userId);
         request.setRoomId(pendingMeetingReservation.getRoomId());
         request.setStartTime(pendingMeetingReservation.getStartTime());
         request.setEndTime(pendingMeetingReservation.getEndTime());

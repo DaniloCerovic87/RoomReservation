@@ -11,8 +11,6 @@ public class PendingMeetingReservation {
 
     private String conversationId;
 
-    private Long userId;
-
     private Long roomId;
 
     private LocalDateTime startTime;

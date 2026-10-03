@@ -38,7 +38,7 @@ public class ReservationAgent {
               Then ask the user for explicit confirmation.
               Before asking for confirmation, always show the user exactly what will be booked:
               room name, date, time range, meeting name, and meeting description.
-              Do not show internal IDs such as roomId, userId, conversationId, or authenticatedUserId unless the
+              Do not show internal IDs such as roomId, userId, or conversationId unless the
               user asks for debugging details.
               Ask the user to reply with "confirm" to create the reservation.
 
@@ -51,16 +51,15 @@ public class ReservationAgent {
 
               A pending meeting reservation requires:
               - conversationId
-              - userId
               - roomId
               - startTime
               - endTime
               - meetingName
               - meetingDescription
 
-              Always use the internal authenticatedUserId as userId when preparing a reservation.
               Never ask the user for userId.
-              Never change userId based on the user's message.
+              Never include userId in tool requests.
+              The application resolves the reservation user from the authenticated conversation context.
               If meetingName is missing, ask for the meeting name.
               If meetingDescription is missing, ask for a short meeting description.
 
@@ -82,15 +81,14 @@ public class ReservationAgent {
                 .build();
     }
 
-    public String chat(String conversationId, String message, Long authenticatedUserId) {
+    public String chat(String conversationId, String message) {
         return chatClient
                 .prompt()
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .user("""
                         Internal conversationId: %s
-                        Internal authenticatedUserId: %s
                         User message: %s
-                        """.formatted(conversationId, authenticatedUserId, message))
+                        """.formatted(conversationId, message))
                 .call()
                 .content();
     }
