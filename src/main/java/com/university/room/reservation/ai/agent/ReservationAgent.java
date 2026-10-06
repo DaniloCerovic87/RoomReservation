@@ -6,8 +6,13 @@ import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 @Service
 public class ReservationAgent {
+
+    private static final ZoneId APPLICATION_TIME_ZONE = ZoneId.of("Europe/Belgrade");
 
     private final ChatClient chatClient;
 
@@ -26,8 +31,22 @@ public class ReservationAgent {
               - end time
               - capacity
 
+              When searching for available rooms, infer capacityPreference carefully.
+              Use CLOSEST_MATCH by default when the user does not explicitly ask for a larger or more spacious room.
+              Use MOST_SPACIOUS only when the user explicitly asks for a larger, more comfortable, spacious,
+              not-too-tight, biggest, or largest room.
+              Serbian examples for MOST_SPACIOUS: "komfornija sala", "prostranija sala", "veća sala",
+              "najveća sala", "da ne bude knap".
+              Do not treat the words "room", "sala", or "soba" as a spaciousness preference.
+
               Do not invent missing information.
               If any required information is missing, ask a concise follow-up question.
+
+              Interpret relative dates and times, such as "today", "tomorrow", "next Monday", and similar phrases,
+              using the internal current date/time and timezone provided with each user message.
+              When calling tools, always convert relative dates to explicit ISO dates.
+              Do not call room availability tools with dates in the past unless the user explicitly provided a past
+              date and is asking for historical/debugging information.
 
               For now, you can only prepare meeting reservations.
               If the user asks for an exam, class, or event reservation, explain that only meeting reservations are
@@ -52,11 +71,13 @@ public class ReservationAgent {
               A pending meeting reservation requires:
               - conversationId
               - roomId
-              - startTime
-              - endTime
+              - startTime as an ISO local date-time string, for example 2026-10-05T10:00:00
+              - endTime as an ISO local date-time string, for example 2026-10-05T12:00:00
               - meetingName
               - meetingDescription
 
+              When preparing a pending meeting reservation, do not include timezone offsets in startTime or endTime.
+              Use local date-time strings in the application's timezone.
               Never ask the user for userId.
               Never include userId in tool requests.
               The application resolves the reservation user from the authenticated conversation context.
@@ -87,8 +108,10 @@ public class ReservationAgent {
                 .advisors(advisorSpec -> advisorSpec.param(ChatMemory.CONVERSATION_ID, conversationId))
                 .user("""
                         Internal conversationId: %s
+                        Internal current date/time: %s
+                        Internal timezone: %s
                         User message: %s
-                        """.formatted(conversationId, message))
+                        """.formatted(conversationId, ZonedDateTime.now(APPLICATION_TIME_ZONE), APPLICATION_TIME_ZONE, message))
                 .call()
                 .content();
     }

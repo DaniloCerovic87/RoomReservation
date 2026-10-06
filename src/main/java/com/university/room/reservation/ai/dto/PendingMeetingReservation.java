@@ -3,8 +3,6 @@ package com.university.room.reservation.ai.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 public class PendingMeetingReservation {
@@ -13,9 +11,9 @@ public class PendingMeetingReservation {
 
     private Long roomId;
 
-    private LocalDateTime startTime;
+    private String startTime;
 
-    private LocalDateTime endTime;
+    private String endTime;
 
     private String reservationPurpose;
 

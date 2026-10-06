@@ -24,6 +24,10 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Component
@@ -49,9 +53,12 @@ public class ReservationTools {
                                                                                                                                                                                                                                                                                                                               \s
             When calling this tool, infer capacityPreference from the user's message.                                                                                                                                                                                                                                        \s
                                                                                                                                                                                                                                                                                                                               \s
-            Set capacityPreference to MOST_SPACIOUS when the user asks for a larger, more comfortable, spacious, roomy, or not-too-tight room.                                                                                                                                                                               \s
+            Set capacityPreference to MOST_SPACIOUS only when the user explicitly asks for a larger, more comfortable, spacious, roomy, not-too-tight, biggest, or largest room.                                                                                                                                             \s
+            Serbian examples for MOST_SPACIOUS include: "komfornija sala", "prostranija sala", "veća sala", "najveća sala", "da ne bude knap".                                                                                                                 \s
                                                                                                                                                                                                                                                                                                                               \s
             Set capacityPreference to CLOSEST_MATCH when the user asks for the smallest suitable room, closest fit, best capacity match, least unused capacity, or does not specify any capacity preference.                                                                                                                 \s
+            Serbian examples for CLOSEST_MATCH include: "najmanja odgovarajuća sala", "najbliža po kapacitetu", or no capacity preference.                                                                                                                     \s
+            Do not set MOST_SPACIOUS just because the user asks for a room/sala/soba. Room, sala, and soba are normal nouns, not spaciousness preferences.                                                                                                      \s
                                                                                                                                                                                                                                                                                                                               \s
             Do not mention capacityPreference to the user unless they ask for debugging details.                                                                                                                                                                                                                             \s
                                                                                                                                                                                                                                                                                                                               \s
@@ -201,12 +208,24 @@ public class ReservationTools {
         ReservationRequest request = new ReservationRequest();
         request.setUserId(userId);
         request.setRoomId(pendingMeetingReservation.getRoomId());
-        request.setStartTime(pendingMeetingReservation.getStartTime());
-        request.setEndTime(pendingMeetingReservation.getEndTime());
+        request.setStartTime(parseLocalDateTime(pendingMeetingReservation.getStartTime()));
+        request.setEndTime(parseLocalDateTime(pendingMeetingReservation.getEndTime()));
         request.setReservationPurpose(ReservationPurpose.MEETING.getValue());
         request.setMeetingName(pendingMeetingReservation.getMeetingName());
         request.setMeetingDescription(pendingMeetingReservation.getMeetingDescription());
         return request;
+    }
+
+    private static LocalDateTime parseLocalDateTime(String value) {
+        try {
+            return LocalDateTime.parse(value);
+        } catch (DateTimeParseException ignored) {
+            try {
+                return OffsetDateTime.parse(value).toLocalDateTime();
+            } catch (DateTimeParseException ignoredAgain) {
+                return ZonedDateTime.parse(value).toLocalDateTime();
+            }
+        }
     }
 
     private String getMessage(String messageKey, Object... params) {
