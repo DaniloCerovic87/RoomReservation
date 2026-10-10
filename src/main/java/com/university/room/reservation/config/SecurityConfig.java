@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/ai/chat").authenticated()
+                        .requestMatchers("/api/ai/evals/**").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
