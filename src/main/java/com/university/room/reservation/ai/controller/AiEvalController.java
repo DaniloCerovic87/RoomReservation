@@ -15,9 +15,24 @@ public class AiEvalController {
 
     private final AiEvalService aiEvalService;
 
-    @PostMapping("/basic-tool-logs")
-    public AiEvalRunResponse runBasicToolLogEvals(Authentication authentication) {
-        return aiEvalService.runBasicToolLogEvals(authentication.getName());
+    @PostMapping("/basic")
+    public AiEvalRunResponse runBasicEvals(Authentication authentication) {
+        return aiEvalService.runBasicEvals(authentication.getName());
+    }
+
+    @PostMapping("/guardrails")
+    public AiEvalRunResponse runGuardrailEvals(Authentication authentication) {
+        return aiEvalService.runGuardrailEvals(authentication.getName());
+    }
+
+    @PostMapping("/reservation-flow")
+    public AiEvalRunResponse runReservationFlowEvals(Authentication authentication) {
+        return aiEvalService.runReservationFlowEvals(authentication.getName());
+    }
+
+    @PostMapping("/all")
+    public AiEvalRunResponse runAllEvals(Authentication authentication) {
+        return aiEvalService.runAllEvals(authentication.getName());
     }
 
 }

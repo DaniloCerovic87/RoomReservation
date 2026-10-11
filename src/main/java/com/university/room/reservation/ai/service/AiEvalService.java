@@ -4,6 +4,12 @@ import com.university.room.reservation.ai.dto.AiEvalRunResponse;
 
 public interface AiEvalService {
 
-    AiEvalRunResponse runBasicToolLogEvals(String username);
+    AiEvalRunResponse runBasicEvals(String username);
+
+    AiEvalRunResponse runGuardrailEvals(String username);
+
+    AiEvalRunResponse runReservationFlowEvals(String username);
+
+    AiEvalRunResponse runAllEvals(String username);
 
 }

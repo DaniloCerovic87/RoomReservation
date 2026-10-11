@@ -34,7 +34,7 @@ public class AiEvalServiceImpl implements AiEvalService {
     private final ObjectMapper objectMapper;
 
     @Override
-    public AiEvalRunResponse runBasicToolLogEvals(String username) {
+    public AiEvalRunResponse runBasicEvals(String username) {
         List<AiEvalScenarioResult> results = List.of(
                 runCapacityPreferenceScenario(
                         "scenario-1",
@@ -55,7 +55,15 @@ public class AiEvalServiceImpl implements AiEvalService {
                         "Missing required information does not call tools",
                         "Rezervisi mi sobu za sutra.",
                         username
-                ),
+                )
+        );
+
+        return response(results);
+    }
+
+    @Override
+    public AiEvalRunResponse runGuardrailEvals(String username) {
+        List<AiEvalScenarioResult> results = List.of(
                 runNoToolCallScenario(
                         "scenario-7",
                         "Confirm without pending reservation does not call tools",
@@ -75,7 +83,15 @@ public class AiEvalServiceImpl implements AiEvalService {
                         "Rezervisi salu za ispit sutra od 10 do 12 za 50 studenata.",
                         PREPARE_MEETING_RESERVATION_TOOL,
                         username
-                ),
+                )
+        );
+
+        return response(results);
+    }
+
+    @Override
+    public AiEvalRunResponse runReservationFlowEvals(String username) {
+        List<AiEvalScenarioResult> results = List.of(
                 runMeetingReservationCorrectionFlowScenario(
                         "scenario-10",
                         "Meeting reservation correction flow creates reservation with updated name",
@@ -83,6 +99,20 @@ public class AiEvalServiceImpl implements AiEvalService {
                 )
         );
 
+        return response(results);
+    }
+
+    @Override
+    public AiEvalRunResponse runAllEvals(String username) {
+        List<AiEvalScenarioResult> results = new ArrayList<>();
+        results.addAll(runBasicEvals(username).getResults());
+        results.addAll(runGuardrailEvals(username).getResults());
+        results.addAll(runReservationFlowEvals(username).getResults());
+
+        return response(results);
+    }
+
+    private AiEvalRunResponse response(List<AiEvalScenarioResult> results) {
         int passed = (int) results.stream()
                 .filter(AiEvalScenarioResult::isPassed)
                 .count();
