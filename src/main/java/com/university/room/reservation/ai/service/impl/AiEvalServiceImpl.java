@@ -27,6 +27,7 @@ public class AiEvalServiceImpl implements AiEvalService {
     private static final ZoneId APPLICATION_TIME_ZONE = ZoneId.of("Europe/Belgrade");
     private static final String FIND_AVAILABLE_ROOMS_TOOL = "findAvailableRooms";
     private static final String PREPARE_MEETING_RESERVATION_TOOL = "prepareMeetingReservation";
+    private static final String CONFIRM_MEETING_RESERVATION_TOOL = "confirmMeetingReservation";
 
     private final AiChatService aiChatService;
     private final AiToolCallLogRepository aiToolCallLogRepository;
@@ -73,6 +74,11 @@ public class AiEvalServiceImpl implements AiEvalService {
                         "Unsupported exam reservation does not prepare meeting reservation",
                         "Rezervisi salu za ispit sutra od 10 do 12 za 50 studenata.",
                         PREPARE_MEETING_RESERVATION_TOOL,
+                        username
+                ),
+                runMeetingReservationCorrectionFlowScenario(
+                        "scenario-10",
+                        "Meeting reservation correction flow creates reservation with updated name",
                         username
                 )
         );
@@ -169,6 +175,33 @@ public class AiEvalServiceImpl implements AiEvalService {
         return result(scenarioId, scenarioName, conversationId, failures);
     }
 
+    private AiEvalScenarioResult runMeetingReservationCorrectionFlowScenario(String scenarioId,
+                                                                            String scenarioName,
+                                                                            String username) {
+        String conversationId = newConversationId(scenarioId);
+
+        sendMessage(
+                conversationId,
+                "Rezervisi sobu za sutra od 10 do 12 za 8 ljudi. Naziv sastanka je PI planiranje, opis je kvartalno planiranje.",
+                username
+        );
+        sendMessage(conversationId, "Izaberi preporucenu sobu.", username);
+        sendMessage(conversationId, "Nije PI planiranje nego Sprint planiranje.", username);
+        sendMessage(conversationId, "Potvrdi rezervaciju.", username);
+
+        List<AiToolCallLog> logs = aiToolCallLogRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
+        List<String> failures = new ArrayList<>();
+
+        assertToolCallExists(logs, FIND_AVAILABLE_ROOMS_TOOL, failures);
+        assertToolCallExists(logs, PREPARE_MEETING_RESERVATION_TOOL, failures);
+        assertToolCallExists(logs, CONFIRM_MEETING_RESERVATION_TOOL, failures);
+        assertToolOrder(logs, failures, FIND_AVAILABLE_ROOMS_TOOL, PREPARE_MEETING_RESERVATION_TOOL, CONFIRM_MEETING_RESERVATION_TOOL);
+        assertPreparedMeetingName(logs, "Sprint planiranje", failures);
+        assertConfirmedMeetingName(logs, "Sprint planiranje", failures);
+
+        return result(scenarioId, scenarioName, conversationId, failures);
+    }
+
     private void sendMessage(String conversationId, String message, String username) {
         AiChatRequest request = new AiChatRequest();
         request.setConversationId(conversationId);
@@ -194,6 +227,83 @@ public class AiEvalServiceImpl implements AiEvalService {
             }
         } catch (Exception e) {
             failures.add("Failed to parse findAvailableRooms tool input: " + e.getMessage());
+        }
+    }
+
+    private void assertToolCallExists(List<AiToolCallLog> logs, String toolName, List<String> failures) {
+        boolean exists = logs.stream()
+                .anyMatch(log -> toolName.equals(log.getToolName()));
+
+        if (!exists) {
+            failures.add("Expected " + toolName + " tool call, but no such log was found.");
+        }
+    }
+
+    private void assertToolOrder(List<AiToolCallLog> logs, List<String> failures, String... expectedToolOrder) {
+        int currentIndex = 0;
+
+        for (AiToolCallLog log : logs) {
+            if (currentIndex < expectedToolOrder.length && expectedToolOrder[currentIndex].equals(log.getToolName())) {
+                currentIndex++;
+            }
+        }
+
+        if (currentIndex < expectedToolOrder.length) {
+            failures.add("Expected tool order " + String.join(" -> ", expectedToolOrder) + " was not found.");
+        }
+    }
+
+    private void assertPreparedMeetingName(List<AiToolCallLog> logs, String expectedMeetingName, List<String> failures) {
+        boolean exists = logs.stream()
+                .filter(log -> PREPARE_MEETING_RESERVATION_TOOL.equals(log.getToolName()))
+                .anyMatch(log -> jsonPathEquals(log.getToolInput(), "meetingName", expectedMeetingName));
+
+        if (!exists) {
+            failures.add("Expected a prepared meeting reservation with meetingName " + expectedMeetingName + ".");
+        }
+    }
+
+    private void assertConfirmedMeetingName(List<AiToolCallLog> logs, String expectedMeetingName, List<String> failures) {
+        Optional<AiToolCallLog> confirmLog = logs.stream()
+                .filter(log -> CONFIRM_MEETING_RESERVATION_TOOL.equals(log.getToolName()))
+                .reduce((first, second) -> second);
+
+        if (confirmLog.isEmpty()) {
+            return;
+        }
+
+        if (!jsonPathEquals(confirmLog.get().getToolOutput(), "success", true)) {
+            failures.add("Expected confirmMeetingReservation output success to be true.");
+        }
+
+        if (!jsonPathEquals(confirmLog.get().getToolOutput(), "reservation.meetingName", expectedMeetingName)) {
+            failures.add("Expected confirmed reservation meetingName " + expectedMeetingName + ".");
+        }
+    }
+
+    private boolean jsonPathEquals(String json, String path, String expectedValue) {
+        JsonNode node = jsonPath(json, path);
+        return node != null && expectedValue.equals(node.asText());
+    }
+
+    private boolean jsonPathEquals(String json, String path, boolean expectedValue) {
+        JsonNode node = jsonPath(json, path);
+        return node != null && node.asBoolean() == expectedValue;
+    }
+
+    private JsonNode jsonPath(String json, String path) {
+        if (json == null) {
+            return null;
+        }
+
+        try {
+            JsonNode node = objectMapper.readTree(json);
+            for (String field : path.split("\\.")) {
+                node = node.path(field);
+            }
+            return node.isMissingNode() ? null : node;
+        } catch (Exception e) {
+            return null;
         }
     }
 

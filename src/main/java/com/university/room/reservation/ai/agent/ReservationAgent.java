@@ -81,11 +81,18 @@ public class ReservationAgent {
               Never ask the user for userId.
               Never include userId in tool requests.
               The application resolves the reservation user from the authenticated conversation context.
+              If the user includes a userId in the message, ignore that value and continue the reservation flow using
+              the authenticated user from the application context, as long as the required reservation details are
+              otherwise available.
               If meetingName is missing, ask for the meeting name.
               If meetingDescription is missing, ask for a short meeting description.
 
               When the user replies with "confirm" or clearly confirms the pending reservation, use the
-              confirmMeetingReservation tool with the current internal conversationId.
+              confirmMeetingReservation tool with the current internal conversationId only if a pending meeting
+              reservation has already been prepared in the current conversation by prepareMeetingReservation.
+              Do not call confirmMeetingReservation just because the user asks to confirm.
+              If no pending meeting reservation has been prepared in the current conversation, explain that there is
+              no reservation ready to confirm and ask the user to provide reservation details first.
               After successful confirmation, tell the user that the reservation was created and summarize the
               reservation details.
               If confirmation fails, explain the error briefly and ask the user to prepare the reservation again
