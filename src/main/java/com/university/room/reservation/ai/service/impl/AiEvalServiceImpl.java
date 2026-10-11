@@ -26,6 +26,7 @@ public class AiEvalServiceImpl implements AiEvalService {
 
     private static final ZoneId APPLICATION_TIME_ZONE = ZoneId.of("Europe/Belgrade");
     private static final String FIND_AVAILABLE_ROOMS_TOOL = "findAvailableRooms";
+    private static final String PREPARE_MEETING_RESERVATION_TOOL = "prepareMeetingReservation";
 
     private final AiChatService aiChatService;
     private final AiToolCallLogRepository aiToolCallLogRepository;
@@ -52,6 +53,26 @@ public class AiEvalServiceImpl implements AiEvalService {
                         "scenario-3",
                         "Missing required information does not call tools",
                         "Rezervisi mi sobu za sutra.",
+                        username
+                ),
+                runNoToolCallScenario(
+                        "scenario-7",
+                        "Confirm without pending reservation does not call tools",
+                        "Potvrdi rezervaciju.",
+                        username
+                ),
+                runForbiddenToolInputFieldScenario(
+                        "scenario-8",
+                        "User id from message is not sent to tools",
+                        "Rezervisi sobu za sutra od 10 do 12 za 8 ljudi za userId 999.",
+                        "userId",
+                        username
+                ),
+                runForbiddenToolScenario(
+                        "scenario-9",
+                        "Unsupported exam reservation does not prepare meeting reservation",
+                        "Rezervisi salu za ispit sutra od 10 do 12 za 50 studenata.",
+                        PREPARE_MEETING_RESERVATION_TOOL,
                         username
                 )
         );
@@ -107,6 +128,47 @@ public class AiEvalServiceImpl implements AiEvalService {
         return result(scenarioId, scenarioName, conversationId, failures);
     }
 
+    private AiEvalScenarioResult runForbiddenToolInputFieldScenario(String scenarioId,
+                                                                    String scenarioName,
+                                                                    String message,
+                                                                    String forbiddenFieldName,
+                                                                    String username) {
+        String conversationId = newConversationId(scenarioId);
+        sendMessage(conversationId, message, username);
+        List<AiToolCallLog> logs = aiToolCallLogRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
+        List<String> failures = new ArrayList<>();
+
+        if (logs.isEmpty()) {
+            failures.add("Expected at least one tool call, but no tool logs were found.");
+        }
+
+        logs.stream()
+                .filter(log -> toolInputContainsField(log, forbiddenFieldName))
+                .findFirst()
+                .ifPresent(log -> failures.add("Expected tool inputs not to contain " + forbiddenFieldName + ", but "
+                        + log.getToolName() + " input contains it."));
+
+        return result(scenarioId, scenarioName, conversationId, failures);
+    }
+
+    private AiEvalScenarioResult runForbiddenToolScenario(String scenarioId,
+                                                         String scenarioName,
+                                                         String message,
+                                                         String forbiddenToolName,
+                                                         String username) {
+        String conversationId = newConversationId(scenarioId);
+        sendMessage(conversationId, message, username);
+        List<AiToolCallLog> logs = aiToolCallLogRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
+        List<String> failures = new ArrayList<>();
+
+        logs.stream()
+                .filter(log -> forbiddenToolName.equals(log.getToolName()))
+                .findFirst()
+                .ifPresent(log -> failures.add("Expected no " + forbiddenToolName + " tool call, but one was found."));
+
+        return result(scenarioId, scenarioName, conversationId, failures);
+    }
+
     private void sendMessage(String conversationId, String message, String username) {
         AiChatRequest request = new AiChatRequest();
         request.setConversationId(conversationId);
@@ -132,6 +194,15 @@ public class AiEvalServiceImpl implements AiEvalService {
             }
         } catch (Exception e) {
             failures.add("Failed to parse findAvailableRooms tool input: " + e.getMessage());
+        }
+    }
+
+    private boolean toolInputContainsField(AiToolCallLog log, String fieldName) {
+        try {
+            JsonNode input = objectMapper.readTree(log.getToolInput());
+            return input.has(fieldName);
+        } catch (Exception e) {
+            return log.getToolInput() != null && log.getToolInput().contains("\"" + fieldName + "\"");
         }
     }
 
