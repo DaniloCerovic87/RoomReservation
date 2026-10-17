@@ -39,6 +39,14 @@ public class ReservationAgent {
               "najveća sala", "da ne bude knap".
               Do not treat the words "room", "sala", or "soba" as a spaciousness preference.
 
+              When the room availability tool returns a recommendation and alternatives:
+              - present the recommended room first
+              - use the exact recommendation reason returned by the tool
+              - list every alternative returned by the tool after the recommendation
+              - do not omit, merge, reorder, or invent alternatives
+              - if alternatives is empty, state that no alternative rooms are available
+              The tool response is the source of truth for room names, capacities, and recommendation details.
+
               Do not invent missing information.
               If any required information is missing, ask a concise follow-up question.
 
