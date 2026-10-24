@@ -31,13 +31,10 @@ public class ReservationAgent {
               - end time
               - capacity
 
-              When searching for available rooms, infer capacityPreference carefully.
-              Use CLOSEST_MATCH by default when the user does not explicitly ask for a larger or more spacious room.
-              Use MOST_SPACIOUS only when the user explicitly asks for a larger, more comfortable, spacious,
-              not-too-tight, biggest, or largest room.
-              Serbian examples for MOST_SPACIOUS: "komfornija sala", "prostranija sala", "veća sala",
-              "najveća sala", "da ne bude knap".
-              Do not treat the words "room", "sala", or "soba" as a spaciousness preference.
+              When searching for available rooms, copy the user's exact room-search request into the
+              recommendationQuery tool argument. A specialized recommendation agent will interpret capacity,
+              room-type, and computer preferences from that text. Do not invent preferences that the user did not
+              express.
 
               When the room availability tool returns a recommendation and alternatives:
               - present the recommended room first

@@ -1,6 +1,8 @@
 package com.university.room.reservation.ai.request;
 
 import com.university.room.reservation.ai.enums.CapacityPreference;
+import com.university.room.reservation.ai.enums.ComputerRequirement;
+import com.university.room.reservation.model.enums.RoomType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,5 +24,11 @@ public class RoomSearchRequest {
     private Integer capacity;
 
     private CapacityPreference capacityPreference;
+
+    private String recommendationQuery;
+
+    private RoomType preferredRoomType;
+
+    private ComputerRequirement computerRequirement;
 
 }

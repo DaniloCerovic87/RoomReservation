@@ -270,3 +270,19 @@ Treba mi najmanja odgovarajuća sala za sutra od 10 do 12 za 8 ljudi.
 - AI should call `findAvailableRooms`.
 - Tool input `capacityPreference` should be `CLOSEST_MATCH`.
 - AI should recommend the suitable room with the smallest unused capacity.
+
+## Scenario 12: Computer Room With One Computer Per Participant Uses Structured Criteria
+
+### User Message
+
+```text
+Treba mi najmanja odgovarajuća računarska sala za sutra od 10 do 12 za 8 ljudi, sa računarom za svakoga.
+```
+
+### Expected Result
+
+- AI should call `findAvailableRooms`.
+- Tool input `capacityPreference` should be `CLOSEST_MATCH`.
+- Tool input `preferredRoomType` should be `COMPUTER_ROOM`.
+- Tool input `computerRequirement` should be `ONE_PER_PARTICIPANT`.
+- The deterministic recommendation service should exclude rooms without at least 8 computers.

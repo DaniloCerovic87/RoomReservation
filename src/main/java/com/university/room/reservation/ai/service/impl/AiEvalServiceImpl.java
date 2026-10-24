@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.university.room.reservation.ai.dto.AiEvalRunResponse;
 import com.university.room.reservation.ai.dto.AiEvalScenarioResult;
 import com.university.room.reservation.ai.enums.CapacityPreference;
+import com.university.room.reservation.ai.enums.ComputerRequirement;
 import com.university.room.reservation.ai.request.AiChatRequest;
 import com.university.room.reservation.ai.service.AiChatService;
 import com.university.room.reservation.ai.service.AiEvalService;
 import com.university.room.reservation.model.AiToolCallLog;
+import com.university.room.reservation.model.enums.RoomType;
 import com.university.room.reservation.repository.AiToolCallLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -55,6 +57,15 @@ public class AiEvalServiceImpl implements AiEvalService {
                         "Explicit smallest suitable preference uses closest match",
                         "Treba mi najmanja odgovarajuća sala za sutra od 10 do 12 za 8 ljudi.",
                         CapacityPreference.CLOSEST_MATCH,
+                        username
+                ),
+                runRecommendationCriteriaScenario(
+                        "scenario-12",
+                        "Computer room with one computer per participant uses structured criteria",
+                        "Treba mi najmanja odgovarajuća računarska sala za sutra od 10 do 12 za 8 ljudi, sa računarom za svakoga.",
+                        CapacityPreference.CLOSEST_MATCH,
+                        RoomType.COMPUTER_ROOM,
+                        ComputerRequirement.ONE_PER_PARTICIPANT,
                         username
                 ),
                 runNoToolCallScenario(
@@ -167,6 +178,34 @@ public class AiEvalServiceImpl implements AiEvalService {
 
         if (!logs.isEmpty()) {
             failures.add("Expected no tool calls, but found " + logs.size() + " tool log(s).");
+        }
+
+        return result(scenarioId, scenarioName, conversationId, failures);
+    }
+
+    private AiEvalScenarioResult runRecommendationCriteriaScenario(String scenarioId,
+                                                                    String scenarioName,
+                                                                    String message,
+                                                                    CapacityPreference expectedCapacityPreference,
+                                                                    RoomType expectedRoomType,
+                                                                    ComputerRequirement expectedComputerRequirement,
+                                                                    String username) {
+        String conversationId = newConversationId(scenarioId);
+        sendMessage(conversationId, message, username);
+        List<AiToolCallLog> logs = aiToolCallLogRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
+        List<String> failures = new ArrayList<>();
+
+        Optional<AiToolCallLog> findAvailableRoomsLog = logs.stream()
+                .filter(log -> FIND_AVAILABLE_ROOMS_TOOL.equals(log.getToolName()))
+                .findFirst();
+
+        if (findAvailableRoomsLog.isEmpty()) {
+            failures.add("Expected findAvailableRooms tool call, but no such log was found.");
+        } else {
+            AiToolCallLog log = findAvailableRoomsLog.get();
+            assertFindAvailableRoomsInput(log, expectedCapacityPreference, failures);
+            assertToolInputField(log, "preferredRoomType", expectedRoomType.name(), failures);
+            assertToolInputField(log, "computerRequirement", expectedComputerRequirement.name(), failures);
         }
 
         return result(scenarioId, scenarioName, conversationId, failures);
@@ -351,6 +390,21 @@ public class AiEvalServiceImpl implements AiEvalService {
             return input.has(fieldName);
         } catch (Exception e) {
             return log.getToolInput() != null && log.getToolInput().contains("\"" + fieldName + "\"");
+        }
+    }
+
+    private void assertToolInputField(AiToolCallLog log,
+                                      String fieldName,
+                                      String expectedValue,
+                                      List<String> failures) {
+        try {
+            JsonNode input = objectMapper.readTree(log.getToolInput());
+            String actualValue = input.path(fieldName).asText(null);
+            if (!expectedValue.equals(actualValue)) {
+                failures.add("Expected " + fieldName + " " + expectedValue + ", but got " + actualValue + ".");
+            }
+        } catch (Exception e) {
+            failures.add("Failed to parse " + FIND_AVAILABLE_ROOMS_TOOL + " tool input: " + e.getMessage());
         }
     }
 

@@ -1,7 +1,9 @@
 package com.university.room.reservation.ai.tool;
 
+import com.university.room.reservation.ai.agent.RecommendationAgent;
 import com.university.room.reservation.ai.dto.ConfirmMeetingReservationResponse;
 import com.university.room.reservation.ai.dto.PendingMeetingReservation;
+import com.university.room.reservation.ai.dto.RecommendationCriteria;
 import com.university.room.reservation.ai.dto.RoomRecommendationResponse;
 import com.university.room.reservation.ai.dto.RoomSearchToolResponse;
 import com.university.room.reservation.ai.context.AiConversationContext;
@@ -39,6 +41,7 @@ public class ReservationTools {
     private final PendingMeetingReservationStore pendingMeetingReservationStore;
     private final ReservationService reservationService;
     private final RoomRecommendationService roomRecommendationService;
+    private final RecommendationAgent recommendationAgent;
     private final AiToolCallLogService aiToolCallLogService;
     private final AiConversationContext aiConversationContext;
 
@@ -51,14 +54,8 @@ public class ReservationTools {
              - end time                                                                                                                                                                                                                                                                                                       \s
              - capacity                                                                                                                                                                                                                                                                                                       \s
                                                                                                                                                                                                                                                                                                                               \s
-            When calling this tool, infer capacityPreference from the user's message.                                                                                                                                                                                                                                        \s
-                                                                                                                                                                                                                                                                                                                              \s
-            Set capacityPreference to MOST_SPACIOUS only when the user explicitly asks for a larger, more comfortable, spacious, roomy, not-too-tight, biggest, or largest room.                                                                                                                                             \s
-            Serbian examples for MOST_SPACIOUS include: "komfornija sala", "prostranija sala", "veća sala", "najveća sala", "da ne bude knap".                                                                                                                 \s
-                                                                                                                                                                                                                                                                                                                              \s
-            Set capacityPreference to CLOSEST_MATCH when the user asks for the smallest suitable room, closest fit, best capacity match, least unused capacity, or does not specify any capacity preference.                                                                                                                 \s
-            Serbian examples for CLOSEST_MATCH include: "najmanja odgovarajuća sala", "najbliža po kapacitetu", or no capacity preference.                                                                                                                     \s
-            Do not set MOST_SPACIOUS just because the user asks for a room/sala/soba. Room, sala, and soba are normal nouns, not spaciousness preferences.                                                                                                      \s
+            Set recommendationQuery to the user's exact room-search request.                                                                                                                                                                                                                                                 \s
+            The application uses that query to interpret capacity, room-type, and computer preferences.                                                                                                                                                                                                                      \s
                                                                                                                                                                                                                                                                                                                               \s
             Do not mention capacityPreference to the user unless they ask for debugging details.                                                                                                                                                                                                                             \s
                                                                                                                                                                                                                                                                                                                               \s
@@ -80,8 +77,11 @@ public class ReservationTools {
                     request.getCapacity()
             );
 
+            RecommendationCriteria criteria = resolveRecommendationCriteria(request);
+            applyRecommendationCriteria(request, criteria);
+
             RoomRecommendationResponse recommendation =
-                    roomRecommendationService.recommendRoom(rooms, request.getCapacity(), request.getCapacityPreference());
+                    roomRecommendationService.recommendRoom(rooms, request.getCapacity(), criteria);
 
             RoomSearchToolResponse response = RoomSearchToolResponse.builder()
                     .success(true)
@@ -108,6 +108,31 @@ public class ReservationTools {
             logToolCall(conversationId, userId, "findAvailableRooms", request, null, false, e.getMessage());
             throw e;
         }
+    }
+
+    private RecommendationCriteria resolveRecommendationCriteria(RoomSearchRequest request) {
+        RecommendationCriteria fallback = RecommendationCriteria.builder()
+                .capacityPreference(request.getCapacityPreference())
+                .preferredRoomType(request.getPreferredRoomType())
+                .computerRequirement(request.getComputerRequirement())
+                .build();
+
+        if (request.getRecommendationQuery() == null || request.getRecommendationQuery().isBlank()) {
+            return fallback;
+        }
+
+        try {
+            RecommendationCriteria interpreted = recommendationAgent.interpret(request.getRecommendationQuery());
+            return interpreted == null ? fallback : interpreted;
+        } catch (RuntimeException ignored) {
+            return fallback;
+        }
+    }
+
+    private void applyRecommendationCriteria(RoomSearchRequest request, RecommendationCriteria criteria) {
+        request.setCapacityPreference(criteria.effectiveCapacityPreference());
+        request.setPreferredRoomType(criteria.getPreferredRoomType());
+        request.setComputerRequirement(criteria.effectiveComputerRequirement());
     }
 
 
