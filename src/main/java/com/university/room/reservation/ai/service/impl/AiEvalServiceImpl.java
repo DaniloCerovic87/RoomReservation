@@ -50,6 +50,13 @@ public class AiEvalServiceImpl implements AiEvalService {
                         CapacityPreference.MOST_SPACIOUS,
                         username
                 ),
+                runCapacityPreferenceScenario(
+                        "scenario-11",
+                        "Explicit smallest suitable preference uses closest match",
+                        "Treba mi najmanja odgovarajuća sala za sutra od 10 do 12 za 8 ljudi.",
+                        CapacityPreference.CLOSEST_MATCH,
+                        username
+                ),
                 runNoToolCallScenario(
                         "scenario-3",
                         "Missing required information does not call tools",
@@ -118,6 +125,7 @@ public class AiEvalServiceImpl implements AiEvalService {
                 .count();
 
         return AiEvalRunResponse.builder()
+                .evalRunId("ai-eval-run-" + UUID.randomUUID())
                 .total(results.size())
                 .passed(passed)
                 .failed(results.size() - passed)

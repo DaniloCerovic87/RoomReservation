@@ -256,3 +256,17 @@ Nadji mi sobu za sutra od 10 do 12 za 8 ljudi.
 - `output` contains recommendation reason.
 - AI response reason matches the tool output.
 - AI response does not include unsupported room attributes.
+
+## Scenario 11: Explicit Smallest Suitable Preference Uses Closest Match
+
+### User Message
+
+```text
+Treba mi najmanja odgovarajuća sala za sutra od 10 do 12 za 8 ljudi.
+```
+
+### Expected Result
+
+- AI should call `findAvailableRooms`.
+- Tool input `capacityPreference` should be `CLOSEST_MATCH`.
+- AI should recommend the suitable room with the smallest unused capacity.

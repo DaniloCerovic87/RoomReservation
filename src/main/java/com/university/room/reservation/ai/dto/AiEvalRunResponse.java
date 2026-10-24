@@ -9,6 +9,8 @@ import java.util.List;
 @Getter
 public class AiEvalRunResponse {
 
+    private String evalRunId;
+
     private int total;
 
     private int passed;
