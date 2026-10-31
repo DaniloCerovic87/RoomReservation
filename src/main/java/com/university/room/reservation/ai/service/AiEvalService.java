@@ -10,6 +10,8 @@ public interface AiEvalService {
 
     AiEvalRunResponse runReservationFlowEvals(String username);
 
+    AiEvalRunResponse runHistoryEvals(String username);
+
     AiEvalRunResponse runAllEvals(String username);
 
 }

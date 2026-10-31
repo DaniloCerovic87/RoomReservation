@@ -9,6 +9,7 @@ import com.university.room.reservation.ai.dto.RoomSearchToolResponse;
 import com.university.room.reservation.ai.context.AiConversationContext;
 import com.university.room.reservation.ai.request.RoomSearchRequest;
 import com.university.room.reservation.ai.service.AiToolCallLogService;
+import com.university.room.reservation.ai.service.HistoricalRoomPreferenceService;
 import com.university.room.reservation.ai.service.RoomRecommendationService;
 import com.university.room.reservation.ai.store.PendingMeetingReservationStore;
 import com.university.room.reservation.constants.MessageProperties;
@@ -41,6 +42,7 @@ public class ReservationTools {
     private final PendingMeetingReservationStore pendingMeetingReservationStore;
     private final ReservationService reservationService;
     private final RoomRecommendationService roomRecommendationService;
+    private final HistoricalRoomPreferenceService historicalRoomPreferenceService;
     private final RecommendationAgent recommendationAgent;
     private final AiToolCallLogService aiToolCallLogService;
     private final AiConversationContext aiConversationContext;
@@ -77,7 +79,7 @@ public class ReservationTools {
                     request.getCapacity()
             );
 
-            RecommendationCriteria criteria = resolveRecommendationCriteria(request);
+            RecommendationCriteria criteria = resolveRecommendationCriteria(request, userId);
             applyRecommendationCriteria(request, criteria);
 
             RoomRecommendationResponse recommendation =
@@ -110,7 +112,7 @@ public class ReservationTools {
         }
     }
 
-    private RecommendationCriteria resolveRecommendationCriteria(RoomSearchRequest request) {
+    private RecommendationCriteria resolveRecommendationCriteria(RoomSearchRequest request, Long userId) {
         RecommendationCriteria fallback = RecommendationCriteria.builder()
                 .capacityPreference(request.getCapacityPreference())
                 .preferredRoomType(request.getPreferredRoomType())
@@ -118,15 +120,26 @@ public class ReservationTools {
                 .build();
 
         if (request.getRecommendationQuery() == null || request.getRecommendationQuery().isBlank()) {
-            return fallback;
+            return applyHistoricalRoomTypeFallback(fallback, userId);
         }
 
         try {
             RecommendationCriteria interpreted = recommendationAgent.interpret(request.getRecommendationQuery());
-            return interpreted == null ? fallback : interpreted;
+            RecommendationCriteria criteria = interpreted == null ? fallback : interpreted;
+            return applyHistoricalRoomTypeFallback(criteria, userId);
         } catch (RuntimeException ignored) {
-            return fallback;
+            return applyHistoricalRoomTypeFallback(fallback, userId);
         }
+    }
+
+    private RecommendationCriteria applyHistoricalRoomTypeFallback(RecommendationCriteria criteria, Long userId) {
+        if (criteria.getPreferredRoomType() != null) {
+            return criteria;
+        }
+
+        historicalRoomPreferenceService.findPreferredRoomType(userId)
+                .ifPresent(criteria::setPreferredRoomType);
+        return criteria;
     }
 
     private void applyRecommendationCriteria(RoomSearchRequest request, RecommendationCriteria criteria) {

@@ -10,12 +10,21 @@ import com.university.room.reservation.ai.request.AiChatRequest;
 import com.university.room.reservation.ai.service.AiChatService;
 import com.university.room.reservation.ai.service.AiEvalService;
 import com.university.room.reservation.model.AiToolCallLog;
+import com.university.room.reservation.model.MeetingReservation;
+import com.university.room.reservation.model.Room;
+import com.university.room.reservation.model.User;
+import com.university.room.reservation.model.enums.ReservationStatus;
 import com.university.room.reservation.model.enums.RoomType;
 import com.university.room.reservation.repository.AiToolCallLogRepository;
+import com.university.room.reservation.repository.ReservationRepository;
+import com.university.room.reservation.repository.RoomRepository;
+import com.university.room.reservation.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +43,9 @@ public class AiEvalServiceImpl implements AiEvalService {
     private final AiChatService aiChatService;
     private final AiToolCallLogRepository aiToolCallLogRepository;
     private final ObjectMapper objectMapper;
+    private final ReservationRepository reservationRepository;
+    private final RoomRepository roomRepository;
+    private final UserRepository userRepository;
 
     @Override
     public AiEvalRunResponse runBasicEvals(String username) {
@@ -121,13 +133,92 @@ public class AiEvalServiceImpl implements AiEvalService {
     }
 
     @Override
+    public AiEvalRunResponse runHistoryEvals(String username) {
+        return response(List.of(runHistoricalRoomPreferenceScenario(username)));
+    }
+
+    @Override
     public AiEvalRunResponse runAllEvals(String username) {
         List<AiEvalScenarioResult> results = new ArrayList<>();
         results.addAll(runBasicEvals(username).getResults());
         results.addAll(runGuardrailEvals(username).getResults());
         results.addAll(runReservationFlowEvals(username).getResults());
+        results.addAll(runHistoryEvals(username).getResults());
 
         return response(results);
+    }
+
+    private AiEvalScenarioResult runHistoricalRoomPreferenceScenario(String username) {
+        String scenarioId = "scenario-history-1";
+        String conversationId = newConversationId(scenarioId);
+        List<Long> fixtureReservationIds = new ArrayList<>();
+        List<String> failures = new ArrayList<>();
+
+        try {
+            User user = userRepository.findByUsername(username).orElseThrow();
+            Room computerRoom = findRoomByType(RoomType.COMPUTER_ROOM);
+            Room classroom = findRoomByType(RoomType.CLASSROOM);
+
+            for (int i = 0; i < 5; i++) {
+                MeetingReservation reservation = new MeetingReservation();
+                reservation.setUser(user);
+                reservation.setRoom(i < 3 ? computerRoom : classroom);
+                reservation.setStartTime(LocalDateTime.now(APPLICATION_TIME_ZONE)
+                        .plusDays(10L + i)
+                        .with(LocalTime.of(10, 0)));
+                reservation.setEndTime(LocalDateTime.now(APPLICATION_TIME_ZONE)
+                        .plusDays(10L + i)
+                        .with(LocalTime.of(12, 0)));
+                reservation.setReservationStatus(ReservationStatus.APPROVED);
+                reservation.setMeetingName("AI history eval " + (i + 1));
+                reservation.setMeetingDescription("Temporary history fixture");
+                fixtureReservationIds.add(reservationRepository.save(reservation).getId());
+            }
+
+            String requestedDate = LocalDate.now(APPLICATION_TIME_ZONE).plusDays(1).toString();
+            sendMessage(
+                    conversationId,
+                    "Treba mi soba za " + requestedDate + " od 10:00 do 12:00 za 8 ljudi.",
+                    username
+            );
+
+            List<AiToolCallLog> logs = aiToolCallLogRepository
+                    .findByConversationIdOrderByCreatedAtAsc(conversationId);
+            Optional<AiToolCallLog> roomSearchLog = logs.stream()
+                    .filter(log -> FIND_AVAILABLE_ROOMS_TOOL.equals(log.getToolName()))
+                    .findFirst();
+
+            if (roomSearchLog.isEmpty()) {
+                failures.add("Expected findAvailableRooms tool call, but no such log was found.");
+            } else {
+                assertToolInputField(
+                        roomSearchLog.get(),
+                        "preferredRoomType",
+                        RoomType.COMPUTER_ROOM.name(),
+                        failures
+                );
+            }
+        } catch (Exception exception) {
+            failures.add("Historical preference eval failed: " + exception.getMessage());
+        } finally {
+            if (!fixtureReservationIds.isEmpty()) {
+                reservationRepository.deleteAllById(fixtureReservationIds);
+            }
+        }
+
+        return result(
+                scenarioId,
+                "Historical majority preference is used when current request has no room type",
+                conversationId,
+                failures
+        );
+    }
+
+    private Room findRoomByType(RoomType roomType) {
+        return roomRepository.findAll().stream()
+                .filter(room -> roomType == room.getRoomType())
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No room found for type " + roomType));
     }
 
     private AiEvalRunResponse response(List<AiEvalScenarioResult> results) {

@@ -30,6 +30,11 @@ public class AiEvalController {
         return aiEvalService.runReservationFlowEvals(authentication.getName());
     }
 
+    @PostMapping("/history")
+    public AiEvalRunResponse runHistoryEvals(Authentication authentication) {
+        return aiEvalService.runHistoryEvals(authentication.getName());
+    }
+
     @PostMapping("/all")
     public AiEvalRunResponse runAllEvals(Authentication authentication) {
         return aiEvalService.runAllEvals(authentication.getName());
