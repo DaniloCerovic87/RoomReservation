@@ -134,7 +134,51 @@ public class AiEvalServiceImpl implements AiEvalService {
 
     @Override
     public AiEvalRunResponse runHistoryEvals(String username) {
-        return response(List.of(runHistoricalRoomPreferenceScenario(username)));
+        List<AiEvalScenarioResult> results = List.of(
+                runHistoricalRoomPreferenceScenario(
+                        "scenario-history-1",
+                        "Historical majority preference is used when current request has no room type",
+                        List.of(
+                                RoomType.COMPUTER_ROOM,
+                                RoomType.COMPUTER_ROOM,
+                                RoomType.COMPUTER_ROOM,
+                                RoomType.CLASSROOM,
+                                RoomType.CLASSROOM
+                        ),
+                        "Treba mi soba bez posebnog tipa za 8 ljudi.",
+                        RoomType.COMPUTER_ROOM,
+                        username
+                ),
+                runHistoricalRoomPreferenceScenario(
+                        "scenario-history-2",
+                        "Current explicit room type overrides historical majority",
+                        List.of(
+                                RoomType.COMPUTER_ROOM,
+                                RoomType.COMPUTER_ROOM,
+                                RoomType.COMPUTER_ROOM,
+                                RoomType.CLASSROOM,
+                                RoomType.CLASSROOM
+                        ),
+                        "Ovog puta želim običnu učionicu za 8 ljudi.",
+                        RoomType.CLASSROOM,
+                        username
+                ),
+                runHistoricalRoomPreferenceScenario(
+                        "scenario-history-3",
+                        "No historical majority leaves room type unspecified",
+                        List.of(
+                                RoomType.COMPUTER_ROOM,
+                                RoomType.COMPUTER_ROOM,
+                                RoomType.CLASSROOM,
+                                RoomType.CLASSROOM
+                        ),
+                        "Treba mi soba bez posebnog tipa za 8 ljudi.",
+                        null,
+                        username
+                )
+        );
+
+        return response(results);
     }
 
     @Override
@@ -148,8 +192,12 @@ public class AiEvalServiceImpl implements AiEvalService {
         return response(results);
     }
 
-    private AiEvalScenarioResult runHistoricalRoomPreferenceScenario(String username) {
-        String scenarioId = "scenario-history-1";
+    private AiEvalScenarioResult runHistoricalRoomPreferenceScenario(String scenarioId,
+                                                                      String scenarioName,
+                                                                      List<RoomType> historicalRoomTypes,
+                                                                      String message,
+                                                                      RoomType expectedRoomType,
+                                                                      String username) {
         String conversationId = newConversationId(scenarioId);
         List<Long> fixtureReservationIds = new ArrayList<>();
         List<String> failures = new ArrayList<>();
@@ -159,15 +207,17 @@ public class AiEvalServiceImpl implements AiEvalService {
             Room computerRoom = findRoomByType(RoomType.COMPUTER_ROOM);
             Room classroom = findRoomByType(RoomType.CLASSROOM);
 
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < historicalRoomTypes.size(); i++) {
                 MeetingReservation reservation = new MeetingReservation();
                 reservation.setUser(user);
-                reservation.setRoom(i < 3 ? computerRoom : classroom);
+                reservation.setRoom(historicalRoomTypes.get(i) == RoomType.COMPUTER_ROOM
+                        ? computerRoom
+                        : classroom);
                 reservation.setStartTime(LocalDateTime.now(APPLICATION_TIME_ZONE)
-                        .plusDays(10L + i)
+                        .plusDays(100L + i)
                         .with(LocalTime.of(10, 0)));
                 reservation.setEndTime(LocalDateTime.now(APPLICATION_TIME_ZONE)
-                        .plusDays(10L + i)
+                        .plusDays(100L + i)
                         .with(LocalTime.of(12, 0)));
                 reservation.setReservationStatus(ReservationStatus.APPROVED);
                 reservation.setMeetingName("AI history eval " + (i + 1));
@@ -176,11 +226,7 @@ public class AiEvalServiceImpl implements AiEvalService {
             }
 
             String requestedDate = LocalDate.now(APPLICATION_TIME_ZONE).plusDays(1).toString();
-            sendMessage(
-                    conversationId,
-                    "Treba mi soba za " + requestedDate + " od 10:00 do 12:00 za 8 ljudi.",
-                    username
-            );
+            sendMessage(conversationId, message + " Za " + requestedDate + " od 10:00 do 12:00.", username);
 
             List<AiToolCallLog> logs = aiToolCallLogRepository
                     .findByConversationIdOrderByCreatedAtAsc(conversationId);
@@ -191,12 +237,16 @@ public class AiEvalServiceImpl implements AiEvalService {
             if (roomSearchLog.isEmpty()) {
                 failures.add("Expected findAvailableRooms tool call, but no such log was found.");
             } else {
-                assertToolInputField(
-                        roomSearchLog.get(),
-                        "preferredRoomType",
-                        RoomType.COMPUTER_ROOM.name(),
-                        failures
-                );
+                if (expectedRoomType == null) {
+                    assertToolInputFieldIsNull(roomSearchLog.get(), "preferredRoomType", failures);
+                } else {
+                    assertToolInputField(
+                            roomSearchLog.get(),
+                            "preferredRoomType",
+                            expectedRoomType.name(),
+                            failures
+                    );
+                }
             }
         } catch (Exception exception) {
             failures.add("Historical preference eval failed: " + exception.getMessage());
@@ -208,7 +258,7 @@ public class AiEvalServiceImpl implements AiEvalService {
 
         return result(
                 scenarioId,
-                "Historical majority preference is used when current request has no room type",
+                scenarioName,
                 conversationId,
                 failures
         );
@@ -219,6 +269,20 @@ public class AiEvalServiceImpl implements AiEvalService {
                 .filter(room -> roomType == room.getRoomType())
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No room found for type " + roomType));
+    }
+
+    private void assertToolInputFieldIsNull(AiToolCallLog log,
+                                           String fieldName,
+                                           List<String> failures) {
+        try {
+            JsonNode input = objectMapper.readTree(log.getToolInput());
+            if (!input.has(fieldName) || !input.get(fieldName).isNull()) {
+                failures.add("Expected " + fieldName + " to be null, but got "
+                        + input.path(fieldName).asText(null) + ".");
+            }
+        } catch (Exception e) {
+            failures.add("Failed to parse tool input: " + e.getMessage());
+        }
     }
 
     private AiEvalRunResponse response(List<AiEvalScenarioResult> results) {
