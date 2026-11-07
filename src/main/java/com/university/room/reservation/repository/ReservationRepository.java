@@ -10,12 +10,18 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     Collection<Reservation> findByRoomId(Long roomId);
 
     boolean existsByRoomId(Long id);
+
+    List<Reservation> findTop5ByUserIdAndReservationStatusInOrderByStartTimeDesc(
+            Long userId,
+            Collection<ReservationStatus> statuses
+    );
 
     @Query("SELECT r FROM Reservation r " +
             "WHERE (:type IS NULL OR TYPE(r) = :type) " +

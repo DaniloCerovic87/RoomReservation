@@ -7,9 +7,12 @@ import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 
 @UtilityClass
 public class ReservationValidator {
+
+    private static final int RESERVATION_SLOT_MINUTES = 15;
 
     public static void validateClassReservation(ReservationRequest request) {
         if (StringUtils.isBlank(request.getSubject())) {
@@ -56,9 +59,19 @@ public class ReservationValidator {
     public static void validateReservationDuration(ReservationRequest request) {
         long durationInMinutes = Duration.between(request.getStartTime(), request.getEndTime()).toMinutes();
 
-        if (durationInMinutes < 5) {
+        if (durationInMinutes < RESERVATION_SLOT_MINUTES) {
             throw new ValidationException(MessageProperties.RESERVATION_DURATION_TIME_INVALID);
         }
+
+        if (!isOnReservationSlot(request.getStartTime()) || !isOnReservationSlot(request.getEndTime())) {
+            throw new ValidationException(MessageProperties.RESERVATION_TIME_SLOT_INVALID, RESERVATION_SLOT_MINUTES);
+        }
+    }
+
+    private static boolean isOnReservationSlot(LocalDateTime dateTime) {
+        return dateTime.getMinute() % RESERVATION_SLOT_MINUTES == 0
+                && dateTime.getSecond() == 0
+                && dateTime.getNano() == 0;
     }
 
 }

@@ -6,6 +6,7 @@ import com.university.room.reservation.exception.ResourceNotFoundException;
 import com.university.room.reservation.exception.ValidationException;
 import com.university.room.reservation.mapper.RoomMapper;
 import com.university.room.reservation.model.Room;
+import com.university.room.reservation.model.enums.ReservationStatus;
 import com.university.room.reservation.repository.ReservationRepository;
 import com.university.room.reservation.repository.RoomRepository;
 import com.university.room.reservation.request.RoomRequest;
@@ -14,7 +15,13 @@ import com.university.room.reservation.util.RoomValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+
+import static com.university.room.reservation.model.enums.ReservationStatus.APPROVED;
+import static com.university.room.reservation.model.enums.ReservationStatus.PENDING;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +34,19 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public List<RoomDTO> getAllRooms() {
         return roomRepository.findAll().stream()
+                .map(RoomMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<RoomDTO> findAvailableRooms(LocalDate date, LocalTime startTime, LocalTime endTime, Integer capacity) {
+        RoomValidator.validateAvailabilitySearch(date, startTime, endTime, capacity);
+
+        LocalDateTime requestedStartTime = LocalDateTime.of(date, startTime);
+        LocalDateTime requestedEndTime = LocalDateTime.of(date, endTime);
+        List<ReservationStatus> blockingStatuses = List.of(PENDING, APPROVED);
+
+        return roomRepository.findAvailableRooms(requestedStartTime, requestedEndTime, capacity, blockingStatuses).stream()
                 .map(RoomMapper::toDto)
                 .toList();
     }

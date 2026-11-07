@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -69,6 +70,18 @@ public class RestExceptionHandler {
                 .status(NOT_FOUND.value())
                 .message("Resource not found")
                 .debugMessage(errorMessage).build();
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Object> handleAuthenticationException(AuthenticationException ex) {
+        log.warn("Authentication failed: {}", ex.getMessage());
+
+        ApiError apiError = ApiError.builder()
+                .status(UNAUTHORIZED.value())
+                .message("Authentication failed")
+                .debugMessage(ex.getMessage())
+                .build();
         return buildResponseEntity(apiError);
     }
 
