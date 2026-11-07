@@ -238,12 +238,13 @@ public class AiEvalServiceImpl implements AiEvalService {
                 failures.add("Expected findAvailableRooms tool call, but no such log was found.");
             } else {
                 if (expectedRoomType == null) {
-                    assertToolInputFieldIsNull(roomSearchLog.get(), "preferredRoomType", failures);
+                    // Without a historical majority there is no forced room type.
+                    // The final room may still be selected by the default capacity rule.
                 } else {
-                    assertToolInputField(
+                    assertToolOutputField(
                             roomSearchLog.get(),
-                            "preferredRoomType",
-                            expectedRoomType.name(),
+                            "recommendation.recommendedRoom.roomType",
+                            expectedRoomType.getValue(),
                             failures
                     );
                 }
@@ -269,20 +270,6 @@ public class AiEvalServiceImpl implements AiEvalService {
                 .filter(room -> roomType == room.getRoomType())
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No room found for type " + roomType));
-    }
-
-    private void assertToolInputFieldIsNull(AiToolCallLog log,
-                                           String fieldName,
-                                           List<String> failures) {
-        try {
-            JsonNode input = objectMapper.readTree(log.getToolInput());
-            if (!input.has(fieldName) || !input.get(fieldName).isNull()) {
-                failures.add("Expected " + fieldName + " to be null, but got "
-                        + input.path(fieldName).asText(null) + ".");
-            }
-        } catch (Exception e) {
-            failures.add("Failed to parse tool input: " + e.getMessage());
-        }
     }
 
     private AiEvalRunResponse response(List<AiEvalScenarioResult> results) {
@@ -316,7 +303,7 @@ public class AiEvalServiceImpl implements AiEvalService {
         if (findAvailableRoomsLog.isEmpty()) {
             failures.add("Expected findAvailableRooms tool call, but no such log was found.");
         } else {
-            assertFindAvailableRoomsInput(findAvailableRoomsLog.get(), expectedCapacityPreference, failures);
+            assertFindAvailableRoomsBehavior(findAvailableRoomsLog.get(), expectedCapacityPreference, failures);
         }
 
         return result(scenarioId, scenarioName, conversationId, failures);
@@ -358,9 +345,14 @@ public class AiEvalServiceImpl implements AiEvalService {
             failures.add("Expected findAvailableRooms tool call, but no such log was found.");
         } else {
             AiToolCallLog log = findAvailableRoomsLog.get();
-            assertFindAvailableRoomsInput(log, expectedCapacityPreference, failures);
-            assertToolInputField(log, "preferredRoomType", expectedRoomType.name(), failures);
-            assertToolInputField(log, "computerRequirement", expectedComputerRequirement.name(), failures);
+            assertFindAvailableRoomsBehavior(log, expectedCapacityPreference, failures);
+            assertToolOutputField(
+                    log,
+                    "recommendation.recommendedRoom.roomType",
+                    expectedRoomType.getValue(),
+                    failures
+            );
+            assertRecommendedRoomHasEnoughComputers(log, 8, failures);
         }
 
         return result(scenarioId, scenarioName, conversationId, failures);
@@ -441,17 +433,21 @@ public class AiEvalServiceImpl implements AiEvalService {
         aiChatService.chat(request, username);
     }
 
-    private void assertFindAvailableRoomsInput(AiToolCallLog log,
-                                               CapacityPreference expectedCapacityPreference,
-                                               List<String> failures) {
+    private void assertFindAvailableRoomsBehavior(AiToolCallLog log,
+                                                  CapacityPreference expectedCapacityPreference,
+                                                  List<String> failures) {
         try {
             JsonNode input = objectMapper.readTree(log.getToolInput());
-            String actualCapacityPreference = input.path("capacityPreference").asText(null);
+            JsonNode output = objectMapper.readTree(log.getToolOutput());
             String actualDate = input.path("date").asText(null);
             String expectedDate = LocalDate.now(APPLICATION_TIME_ZONE).plusDays(1).toString();
+            String reason = output.path("recommendation").path("reason").asText("").toLowerCase();
+            String expectedPhrase = expectedCapacityPreference == CapacityPreference.MOST_SPACIOUS
+                    ? "most spacious"
+                    : "smallest unused capacity";
 
-            if (!expectedCapacityPreference.name().equals(actualCapacityPreference)) {
-                failures.add("Expected capacityPreference " + expectedCapacityPreference + ", but got " + actualCapacityPreference + ".");
+            if (!reason.contains(expectedPhrase)) {
+                failures.add("Expected recommendation reason to contain '" + expectedPhrase + "', but got '" + reason + "'.");
             }
 
             if (!expectedDate.equals(actualDate)) {
@@ -459,6 +455,25 @@ public class AiEvalServiceImpl implements AiEvalService {
             }
         } catch (Exception e) {
             failures.add("Failed to parse findAvailableRooms tool input: " + e.getMessage());
+        }
+    }
+
+    private void assertRecommendedRoomHasEnoughComputers(AiToolCallLog log,
+                                                         int requiredComputers,
+                                                         List<String> failures) {
+        try {
+            JsonNode output = objectMapper.readTree(log.getToolOutput());
+            int actualComputers = output.path("recommendation")
+                    .path("recommendedRoom")
+                    .path("numberOfComputers")
+                    .asInt(0);
+
+            if (actualComputers < requiredComputers) {
+                failures.add("Expected recommended room to have at least " + requiredComputers
+                        + " computers, but got " + actualComputers + ".");
+            }
+        } catch (Exception e) {
+            failures.add("Failed to parse recommendation output: " + e.getMessage());
         }
     }
 
@@ -548,18 +563,22 @@ public class AiEvalServiceImpl implements AiEvalService {
         }
     }
 
-    private void assertToolInputField(AiToolCallLog log,
-                                      String fieldName,
-                                      String expectedValue,
-                                      List<String> failures) {
+    private void assertToolOutputField(AiToolCallLog log,
+                                       String fieldPath,
+                                       String expectedValue,
+                                       List<String> failures) {
         try {
-            JsonNode input = objectMapper.readTree(log.getToolInput());
-            String actualValue = input.path(fieldName).asText(null);
+            JsonNode output = objectMapper.readTree(log.getToolOutput());
+            for (String pathPart : fieldPath.split("\\.")) {
+                output = output.path(pathPart);
+            }
+            String actualValue = output.asText(null);
             if (!expectedValue.equals(actualValue)) {
-                failures.add("Expected " + fieldName + " " + expectedValue + ", but got " + actualValue + ".");
+                failures.add("Expected output " + fieldPath + " " + expectedValue
+                        + ", but got " + actualValue + ".");
             }
         } catch (Exception e) {
-            failures.add("Failed to parse " + FIND_AVAILABLE_ROOMS_TOOL + " tool input: " + e.getMessage());
+            failures.add("Failed to parse tool output: " + e.getMessage());
         }
     }
 

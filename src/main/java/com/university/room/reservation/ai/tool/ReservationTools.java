@@ -1,16 +1,14 @@
 package com.university.room.reservation.ai.tool;
 
-import com.university.room.reservation.ai.agent.RecommendationAgent;
 import com.university.room.reservation.ai.dto.ConfirmMeetingReservationResponse;
 import com.university.room.reservation.ai.dto.PendingMeetingReservation;
-import com.university.room.reservation.ai.dto.RecommendationCriteria;
 import com.university.room.reservation.ai.dto.RoomRecommendationResponse;
+import com.university.room.reservation.ai.dto.RoomRecommendationDecision;
 import com.university.room.reservation.ai.dto.RoomSearchToolResponse;
 import com.university.room.reservation.ai.context.AiConversationContext;
 import com.university.room.reservation.ai.request.RoomSearchRequest;
 import com.university.room.reservation.ai.service.AiToolCallLogService;
-import com.university.room.reservation.ai.service.HistoricalRoomPreferenceService;
-import com.university.room.reservation.ai.service.RoomRecommendationService;
+import com.university.room.reservation.ai.service.RoomRecommendationCoordinator;
 import com.university.room.reservation.ai.store.PendingMeetingReservationStore;
 import com.university.room.reservation.constants.MessageProperties;
 import com.university.room.reservation.dto.ReservationDTO;
@@ -41,9 +39,7 @@ public class ReservationTools {
     private final MessageSource messageSource;
     private final PendingMeetingReservationStore pendingMeetingReservationStore;
     private final ReservationService reservationService;
-    private final RoomRecommendationService roomRecommendationService;
-    private final HistoricalRoomPreferenceService historicalRoomPreferenceService;
-    private final RecommendationAgent recommendationAgent;
+    private final RoomRecommendationCoordinator roomRecommendationCoordinator;
     private final AiToolCallLogService aiToolCallLogService;
     private final AiConversationContext aiConversationContext;
 
@@ -79,11 +75,12 @@ public class ReservationTools {
                     request.getCapacity()
             );
 
-            RecommendationCriteria criteria = resolveRecommendationCriteria(request, userId);
-            applyRecommendationCriteria(request, criteria);
-
-            RoomRecommendationResponse recommendation =
-                    roomRecommendationService.recommendRoom(rooms, request.getCapacity(), criteria);
+            RoomRecommendationDecision decision = roomRecommendationCoordinator.recommend(
+                    rooms,
+                    request,
+                    userId
+            );
+            RoomRecommendationResponse recommendation = decision.response();
 
             RoomSearchToolResponse response = RoomSearchToolResponse.builder()
                     .success(true)
@@ -111,43 +108,6 @@ public class ReservationTools {
             throw e;
         }
     }
-
-    private RecommendationCriteria resolveRecommendationCriteria(RoomSearchRequest request, Long userId) {
-        RecommendationCriteria fallback = RecommendationCriteria.builder()
-                .capacityPreference(request.getCapacityPreference())
-                .preferredRoomType(request.getPreferredRoomType())
-                .computerRequirement(request.getComputerRequirement())
-                .build();
-
-        if (request.getRecommendationQuery() == null || request.getRecommendationQuery().isBlank()) {
-            return applyHistoricalRoomTypeFallback(fallback, userId);
-        }
-
-        try {
-            RecommendationCriteria interpreted = recommendationAgent.interpret(request.getRecommendationQuery());
-            RecommendationCriteria criteria = interpreted == null ? fallback : interpreted;
-            return applyHistoricalRoomTypeFallback(criteria, userId);
-        } catch (RuntimeException ignored) {
-            return applyHistoricalRoomTypeFallback(fallback, userId);
-        }
-    }
-
-    private RecommendationCriteria applyHistoricalRoomTypeFallback(RecommendationCriteria criteria, Long userId) {
-        if (criteria.getPreferredRoomType() != null) {
-            return criteria;
-        }
-
-        historicalRoomPreferenceService.findPreferredRoomType(userId)
-                .ifPresent(criteria::setPreferredRoomType);
-        return criteria;
-    }
-
-    private void applyRecommendationCriteria(RoomSearchRequest request, RecommendationCriteria criteria) {
-        request.setCapacityPreference(criteria.effectiveCapacityPreference());
-        request.setPreferredRoomType(criteria.getPreferredRoomType());
-        request.setComputerRequirement(criteria.effectiveComputerRequirement());
-    }
-
 
     @Tool(description = """
           Prepares a pending meeting room reservation after the user selected a room.
